@@ -6,7 +6,7 @@ A Java Swing color picker built with FlatLaf and MigLayout.
 
 ## Installation
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.dj-raven/swing-color-picker?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.dj-raven/swing-color-picker/versions)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.dj-raven/swing-color-picker?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.dj-raven/swing-color-picker)
 
 Add the dependency
 
