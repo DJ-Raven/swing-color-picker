@@ -1,5 +1,6 @@
 package raven.color.component;
 
+import com.formdev.flatlaf.util.HiDPIUtils;
 import com.formdev.flatlaf.util.ScaledEmptyBorder;
 import raven.color.ColorPicker;
 
@@ -45,10 +46,14 @@ public class ColorHueComponent extends SliderColor {
         int height = getHeight() - (insets.top + insets.bottom);
 
         // draw image
+        HiDPIUtils.paintAtScale1x((Graphics2D) g, x, y, width, height, this::paintImpl);
+        super.paintComponent(g);
+    }
+
+    private void paintImpl(Graphics2D g, int x, int y, int width, int height, double scaleFactor) {
         BufferedImage image = colorPicker.getSelectionModel().getHueImage(width, height, height);
         if (image != null) {
             g.drawImage(image, x, y, null);
         }
-        super.paintComponent(g);
     }
 }

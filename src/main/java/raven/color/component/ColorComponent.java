@@ -1,5 +1,6 @@
 package raven.color.component;
 
+import com.formdev.flatlaf.util.HiDPIUtils;
 import com.formdev.flatlaf.util.ScaledEmptyBorder;
 import com.formdev.flatlaf.util.UIScale;
 import raven.color.ColorPicker;
@@ -104,14 +105,18 @@ public class ColorComponent extends JComponent {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        BufferedImage image = colorPicker.getSelectionModel().getColorImage(width, height, UIScale.scale(10f));
-        if (image != null) {
-            g2.drawImage(image, x, y, null);
-        }
+        HiDPIUtils.paintAtScale1x(g2, x, y, width, height, this::paintImpl);
 
         paintSelection(g2, x, y, width, height);
         g2.dispose();
         super.paintComponent(g);
+    }
+
+    private void paintImpl(Graphics2D g, int x, int y, int width, int height, double scaleFactor) {
+        BufferedImage image = colorPicker.getSelectionModel().getColorImage(width, height, scale(10, scaleFactor));
+        if (image != null) {
+            g.drawImage(image, x, y, null);
+        }
     }
 
     private void paintSelection(Graphics2D g2, int x, int y, int width, int height) {
@@ -157,5 +162,9 @@ public class ColorComponent extends JComponent {
 
     private float clamp(float value) {
         return Math.max(0f, Math.min(1f, value));
+    }
+
+    private int scale(int value, double scaleFactor) {
+        return (int) Math.ceil(UIScale.scale(value) * scaleFactor);
     }
 }
