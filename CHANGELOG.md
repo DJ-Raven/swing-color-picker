@@ -4,7 +4,10 @@
 
 ### Fixed bugs
 
-- Fixed High DPI scaling on draw image hue and image color-component
+- Fixed High DPI scaling on:
+    - draw image hue
+    - draw image color alpha
+    - draw image color-component
 
 ## [1.0.0] - 2025-08-15
 

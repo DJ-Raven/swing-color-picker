@@ -1,5 +1,6 @@
 package raven.color.component;
 
+import com.formdev.flatlaf.util.HiDPIUtils;
 import com.formdev.flatlaf.util.ScaledEmptyBorder;
 import raven.color.ColorPicker;
 
@@ -53,6 +54,11 @@ public class ColorAlphaComponent extends SliderColor {
         int width = getWidth() - (insets.left + insets.right);
         int height = getHeight() - (insets.top + insets.bottom);
 
+        HiDPIUtils.paintAtScale1x((Graphics2D) g, x, y, width, height, this::paintImpl);
+        super.paintComponent(g);
+    }
+
+    private void paintImpl(Graphics2D g, int x, int y, int width, int height, double scaleFactor) {
         BufferedImage img = createTransparentImage(width, height);
         if (img != null) {
             Graphics2D g2 = (Graphics2D) g.create();
@@ -62,7 +68,6 @@ public class ColorAlphaComponent extends SliderColor {
             g2.fill(new RoundRectangle2D.Float(x, y, width, height, height, height));
             g2.dispose();
         }
-        super.paintComponent(g);
     }
 
     private BufferedImage createTransparentImage(int width, int height) {
