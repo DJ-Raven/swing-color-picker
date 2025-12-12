@@ -1,6 +1,5 @@
 package raven.color.component;
 
-import com.formdev.flatlaf.util.HiDPIUtils;
 import com.formdev.flatlaf.util.ScaledEmptyBorder;
 import raven.color.ColorPicker;
 
@@ -11,13 +10,8 @@ public class ColorHueComponent extends SliderColor {
 
     private final ColorPicker colorPicker;
 
-
     public ColorHueComponent(ColorPicker colorPicker) {
         this.colorPicker = colorPicker;
-        init();
-    }
-
-    private void init() {
         install();
     }
 
@@ -28,29 +22,17 @@ public class ColorHueComponent extends SliderColor {
     }
 
     @Override
-    protected void valueChanged(float v) {
-        colorPicker.getSelectionModel().setHue(v);
+    protected void valueChanged(Location location) {
+        colorPicker.getSelectionModel().setHue(location.x);
     }
 
     @Override
-    protected float getValue() {
-        return colorPicker.getSelectionModel().getHue();
+    protected Location getValue() {
+        return new Location(colorPicker.getSelectionModel().getHue(), 0.5f);
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
-        Insets insets = getInsets();
-        int x = insets.left;
-        int y = insets.top;
-        int width = getWidth() - (insets.left + insets.right);
-        int height = getHeight() - (insets.top + insets.bottom);
-
-        // draw image
-        HiDPIUtils.paintAtScale1x((Graphics2D) g, x, y, width, height, this::paintImpl);
-        super.paintComponent(g);
-    }
-
-    private void paintImpl(Graphics2D g, int x, int y, int width, int height, double scaleFactor) {
+    protected void paint(Graphics2D g, int x, int y, int width, int height, double scaleFactor) {
         BufferedImage image = colorPicker.getSelectionModel().getHueImage(width, height, height);
         if (image != null) {
             g.drawImage(image, x, y, null);

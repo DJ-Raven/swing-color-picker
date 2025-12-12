@@ -1,11 +1,10 @@
 package raven.color.component;
 
-import com.formdev.flatlaf.util.HiDPIUtils;
 import com.formdev.flatlaf.util.ScaledEmptyBorder;
 import raven.color.ColorPicker;
+import raven.color.ColorPickerUtils;
 
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -16,10 +15,6 @@ public class ColorAlphaComponent extends SliderColor {
 
     public ColorAlphaComponent(ColorPicker colorPicker) {
         this.colorPicker = colorPicker;
-        init();
-    }
-
-    private void init() {
         install();
     }
 
@@ -30,36 +25,25 @@ public class ColorAlphaComponent extends SliderColor {
     }
 
     @Override
-    protected void valueChanged(float v) {
+    protected void valueChanged(Location location) {
         Color color = colorPicker.getSelectionModel().getSelectedColor();
         if (color != null) {
-            colorPicker.getSelectionModel().setSelectedColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), (int) (v * 255f)), false);
+            colorPicker.getSelectionModel().setSelectedColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), (int) (location.x * 255f)), false);
         }
     }
 
     @Override
-    protected float getValue() {
+    protected Location getValue() {
         Color color = colorPicker.getSelectionModel().getSelectedColor();
         if (color == null) {
-            return 1f;
+            return new Location(1f, 0.5f);
         }
-        return color.getAlpha() / 255f;
+        return new Location(color.getAlpha() / 255f, 0.5f);
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
-        Insets insets = getInsets();
-        int x = insets.left;
-        int y = insets.top;
-        int width = getWidth() - (insets.left + insets.right);
-        int height = getHeight() - (insets.top + insets.bottom);
-
-        HiDPIUtils.paintAtScale1x((Graphics2D) g, x, y, width, height, this::paintImpl);
-        super.paintComponent(g);
-    }
-
-    private void paintImpl(Graphics2D g, int x, int y, int width, int height, double scaleFactor) {
-        BufferedImage img = createTransparentImage(width, height);
+    protected void paint(Graphics2D g, int x, int y, int width, int height, double scaleFactor) {
+        BufferedImage img = createTransparentImage(width, height, scaleFactor);
         if (img != null) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -70,33 +54,9 @@ public class ColorAlphaComponent extends SliderColor {
         }
     }
 
-    private BufferedImage createTransparentImage(int width, int height) {
+    private BufferedImage createTransparentImage(int width, int height, double scaleFactor) {
         if (image == null || image.getWidth() != width || image.getHeight() != height) {
-            int row = 2;
-            float size = height / (float) row;
-            if (size <= 0) {
-                return null;
-            }
-            image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2 = image.createGraphics();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.fill(new RoundRectangle2D.Float(0, 0, width, height, height, height));
-            g2.setComposite(AlphaComposite.SrcIn.derive(0.5f));
-
-            // draw transparent background
-            int count = (int) Math.ceil(width / size);
-            Color color1 = getBackground();
-            Color color2 = Color.GRAY;
-            for (int i = 0; i < row; i++) {
-                for (int j = 0; j < count; j++) {
-                    if ((i + j) % 2 == 0) {
-                        g2.setColor(color1);
-                    } else {
-                        g2.setColor(color2);
-                    }
-                    g2.fill(new Rectangle2D.Float(j * size, size * i, size, size));
-                }
-            }
+            image = ColorPickerUtils.createTransparentImage(getBackground(), scale(5, scaleFactor), width, height, height);
         }
         return image;
     }

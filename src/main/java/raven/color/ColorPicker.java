@@ -61,6 +61,9 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
         if (colorField != null) {
             colorField.colorChanged(selectionModel.getSelectedColor());
         }
+        if (colorPreview != null) {
+            colorPreview.setColor(selectionModel.getSelectedColor());
+        }
     }
 
     private Component createLeftComponent() {

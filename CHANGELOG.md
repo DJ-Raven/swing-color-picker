@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0-SNAPSHOT]
+
+### Changed
+
+- Refactor some code
+- Color preview now paint transparent background
+
 ## [1.0.1] - 2025-11-30
 
 ### Fixed bugs
