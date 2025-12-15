@@ -4,6 +4,8 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import net.miginfocom.swing.MigLayout;
 import raven.color.ColorPicker;
+import raven.color.DinoColorPickerModel;
+import raven.color.DiskColorPickerModel;
 import raven.color.component.ColorPaletteType;
 
 import javax.swing.*;
@@ -31,7 +33,7 @@ public class TestColor extends JFrame {
         add(colorPicker);
 
         colorPicker.addColorChangedListener((color, event) -> {
-            System.out.println("Color changed: " + color);
+            // System.out.println("Color changed: " + color);
         });
 
         createOption();
@@ -45,9 +47,7 @@ public class TestColor extends JFrame {
 
     private void createOption() {
         JPanel panelOption = new JPanel(new MigLayout("wrap,fillx", "[fill]"));
-
         JPanel panelPalette = new JPanel(new MigLayout());
-
         panelPalette.setBorder(new TitledBorder("Options Color Palette"));
 
         chEnablePalette = new JCheckBox("Enable Palette", true);
@@ -78,9 +78,39 @@ public class TestColor extends JFrame {
         panelPalette.add(rTailwindColor);
         panelPalette.add(rMaterialColor);
 
+        panelOption.add(panelPalette);
+
+        // model option
+        JPanel panelModel = new JPanel(new MigLayout());
+        panelModel.setBorder(new TitledBorder("Options Color Model"));
+
+        ButtonGroup group = new ButtonGroup();
+        JRadioButton jrDino = new JRadioButton("Dino Model", true);
+        JRadioButton jrDisk = new JRadioButton("Disk Model");
+
+        jrDino.addActionListener(e -> {
+            if (jrDino.isSelected()) {
+                colorPicker.setModel(new DinoColorPickerModel(colorPicker.getSelectedColor()));
+            }
+        });
+        jrDisk.addActionListener(e -> {
+            if (jrDisk.isSelected()) {
+                colorPicker.setModel(new DiskColorPickerModel(colorPicker.getSelectedColor()));
+            }
+        });
+
+        group.add(jrDino);
+        group.add(jrDisk);
+
+        panelModel.add(jrDino);
+        panelModel.add(jrDisk);
+
+        panelOption.add(panelModel);
+
+        // button
         JButton cmdShowDialog = new JButton("show as dialog");
         cmdShowDialog.addActionListener(e -> {
-            ColorPicker cp = new ColorPicker(colorPicker.getSelectionModel());
+            ColorPicker cp = new ColorPicker(colorPicker.getModel());
             cp.setColorPaletteEnabled(chEnablePalette.isSelected());
             applyColorStyle(cp);
 
@@ -90,11 +120,13 @@ public class TestColor extends JFrame {
                 System.out.println("Color selected: " + color);
             }
         });
-
-        panelOption.add(panelPalette);
         panelOption.add(cmdShowDialog, "grow 0");
 
         add(panelOption);
+    }
+
+    private void createModelOption() {
+
     }
 
     private void applyColorStyle(ColorPicker colorPicker) {

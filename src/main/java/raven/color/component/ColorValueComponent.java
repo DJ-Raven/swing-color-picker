@@ -4,13 +4,12 @@ import com.formdev.flatlaf.util.ScaledEmptyBorder;
 import raven.color.ColorPicker;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
-public class ColorHueComponent extends SliderColor {
+public class ColorValueComponent extends SliderColor {
 
     private final ColorPicker colorPicker;
 
-    public ColorHueComponent(ColorPicker colorPicker) {
+    public ColorValueComponent(ColorPicker colorPicker) {
         this.colorPicker = colorPicker;
         install();
     }
@@ -22,18 +21,18 @@ public class ColorHueComponent extends SliderColor {
     }
 
     @Override
-    protected void valueChanged(Location location) {
-        colorPicker.getSelectionModel().setHue(location.x);
+    protected void valueChanged(ColorLocation value) {
+        colorPicker.getModel().setValue(value.getX());
     }
 
     @Override
-    protected Location getValue() {
-        return new Location(colorPicker.getSelectionModel().getHue(), 0.5f);
+    protected ColorLocation getValue() {
+        return new ColorLocation(colorPicker.getModel().getValue(), 0.5f);
     }
 
     @Override
     protected void paint(Graphics2D g, int x, int y, int width, int height, double scaleFactor) {
-        BufferedImage image = colorPicker.getSelectionModel().getHueImage(width, height, height);
+        Image image = colorPicker.getModel().getValueImage(width, height, 999);
         if (image != null) {
             g.drawImage(image, x, y, null);
         }

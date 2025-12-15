@@ -54,37 +54,28 @@ public abstract class SliderColor extends JComponent {
     }
 
     private void mouseChange(Point point) {
-        Insets insets = getInsets();
-        int x = insets.left;
-        int y = insets.top;
-        int width = getWidth() - (insets.left + insets.right);
-        int height = getHeight() - (insets.top + insets.bottom);
-        int px = point.x - x;
-        int py = point.y - y;
-        float vx = ((float) px) / (float) width;
-        float vy = ((float) py) / (float) height;
+        Rectangle rec = getSlideRectangle();
+        int px = point.x - rec.x;
+        int py = point.y - rec.y;
+        float vx = ((float) px) / (float) rec.width;
+        float vy = ((float) py) / (float) rec.height;
         vx = Math.max(0f, Math.min(1f, vx));
         vy = Math.max(0f, Math.min(1f, vy));
-        valueChanged(new Location(vx, vy));
+        valueChanged(new ColorLocation(vx, vy));
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        Insets insets = getInsets();
-        int x = insets.left;
-        int y = insets.top;
-        int width = getWidth() - (insets.left + insets.right);
-        int height = getHeight() - (insets.top + insets.bottom);
-
+        Rectangle rec = getSlideRectangle();
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        HiDPIUtils.paintAtScale1x(g2, x, y, width, height, this::paint);
+        HiDPIUtils.paintAtScale1x(g2, rec.x, rec.y, rec.width, rec.height, this::paint);
 
         int size = UIScale.scale(selectedSize);
-        Location location = getValue();
-        int selectionX = (int) (x + width * location.x);
-        int selectionY = (int) (y + height * location.y);
+        ColorLocation value = getValue();
+        int selectionX = (int) (rec.x + rec.width * value.getX());
+        int selectionY = (int) (rec.y + rec.height * value.getY());
 
         paintSelection(g2, selectionX, selectionY, size);
 
@@ -92,11 +83,20 @@ public abstract class SliderColor extends JComponent {
         super.paintComponent(g);
     }
 
-    protected abstract void valueChanged(Location location);
+    protected abstract void valueChanged(ColorLocation value);
 
-    protected abstract Location getValue();
+    protected abstract ColorLocation getValue();
 
     protected abstract void paint(Graphics2D g, int x, int y, int width, int height, double scaleFactor);
+
+    protected Rectangle getSlideRectangle() {
+        Insets insets = getInsets();
+        int x = insets.left;
+        int y = insets.top;
+        int width = getWidth() - (insets.left + insets.right);
+        int height = getHeight() - (insets.top + insets.bottom);
+        return new Rectangle(x, y, width, height);
+    }
 
     protected void paintSelection(Graphics2D g2, int x, int y, int size) {
         g2.translate(x - size / 2f, y - size / 2f);
@@ -129,15 +129,5 @@ public abstract class SliderColor extends JComponent {
 
     protected Color getSelectedColor() {
         return null;
-    }
-
-    public static class Location {
-        public final float x;
-        public final float y;
-
-        public Location(float x, float y) {
-            this.x = x;
-            this.y = y;
-        }
     }
 }
