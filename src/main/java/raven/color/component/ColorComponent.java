@@ -4,12 +4,11 @@ import com.formdev.flatlaf.util.ScaledEmptyBorder;
 import raven.color.ColorPicker;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
 public class ColorComponent extends SliderColor {
 
     private final ColorPicker colorPicker;
-    private Location selectedPoint;
+    private ColorLocation selectedPoint;
     private boolean notifyRepaint = true;
 
     public ColorComponent(ColorPicker colorPicker) {
@@ -21,8 +20,8 @@ public class ColorComponent extends SliderColor {
     public void install() {
         super.install();
         setBorder(new ScaledEmptyBorder(10, 10, 10, 10));
-        if (selectedPoint == null && (colorPicker.getSelectionModel() != null && colorPicker.getSelectionModel().getSelectedColor() != null)) {
-            selectedPoint = colorToPoint(colorPicker.getSelectionModel().getSelectedColor());
+        if (selectedPoint == null && (colorPicker.getModel() != null && colorPicker.getModel().getSelectedColor() != null)) {
+            selectedPoint = colorPicker.getModel().colorToLocation(colorPicker.getModel().getSelectedColor());
         }
     }
 
@@ -33,10 +32,12 @@ public class ColorComponent extends SliderColor {
     }
 
     @Override
-    protected void valueChanged(Location location) {
-        selectedPoint = location;
-        Color color = pointToColor(selectedPoint, colorPicker.getSelectionModel().getHue());
-        Color oldColor = colorPicker.getSelectionModel().getSelectedColor();
+    protected void valueChanged(ColorLocation value) {
+        selectedPoint = value;
+        colorPicker.getModel().locationValue(selectedPoint);
+        float v = colorPicker.getModel().getValue();
+        Color color = colorPicker.getModel().locationToColor(selectedPoint, v);
+        Color oldColor = colorPicker.getModel().getSelectedColor();
         if (oldColor != null) {
             int alpha = oldColor.getAlpha();
             if (alpha != 255) {
@@ -45,7 +46,7 @@ public class ColorComponent extends SliderColor {
         }
         try {
             notifyRepaint = false;
-            colorPicker.getSelectionModel().setSelectedColor(color, false);
+            colorPicker.getModel().setSelectedColor(color, false);
         } finally {
             repaint();
             notifyRepaint = true;
@@ -53,8 +54,21 @@ public class ColorComponent extends SliderColor {
     }
 
     @Override
-    protected Location getValue() {
+    protected ColorLocation getValue() {
         return selectedPoint;
+    }
+
+    @Override
+    protected Rectangle getSlideRectangle() {
+        Rectangle rec = super.getSlideRectangle();
+        ColorDimension size = colorPicker.getModel().getDimensionImage(rec.width, rec.height);
+        int x = (rec.width - size.width) / 2;
+        int y = (rec.height - size.height) / 2;
+        rec.x += x;
+        rec.y += y;
+        rec.width = size.width;
+        rec.height = size.height;
+        return rec;
     }
 
     public boolean isNotifyRepaint() {
@@ -65,33 +79,22 @@ public class ColorComponent extends SliderColor {
         if (color == null) {
             selectedPoint = null;
         } else {
-            selectedPoint = colorToPoint(color);
+            selectedPoint = colorPicker.getModel().colorToLocation(color);
         }
     }
 
     @Override
     protected void paint(Graphics2D g, int x, int y, int width, int height, double scaleFactor) {
-        BufferedImage image = colorPicker.getSelectionModel().getColorImage(width, height, scale(10, scaleFactor));
+        Image image = colorPicker.getModel().getColorImage(width, height, scale(10, scaleFactor));
         if (image != null) {
-            g.drawImage(image, x, y, null);
+            int lx = (width - image.getWidth(null)) / 2;
+            int ly = (height - image.getHeight(null)) / 2;
+            g.drawImage(image, x + lx, y + ly, null);
         }
     }
 
     @Override
     protected Color getSelectedColor() {
-        return new Color(colorPicker.getSelectionModel().getSelectedColor().getRGB());
-    }
-
-    private Location colorToPoint(Color color) {
-        float[] hbs = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
-        float x = hbs[1];
-        float y = 1f - hbs[2];
-        return new Location(x, y);
-    }
-
-    private Color pointToColor(Location location, float hue) {
-        float saturation = location.x;
-        float brightness = 1f - location.y;
-        return Color.getHSBColor(hue, saturation, brightness);
+        return new Color(colorPicker.getModel().getSelectedColor().getRGB());
     }
 }

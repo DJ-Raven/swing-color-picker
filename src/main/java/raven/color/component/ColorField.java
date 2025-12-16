@@ -203,7 +203,7 @@ public class ColorField extends JComponent implements PropertyChangeListener {
             String colorHex = txtHex.getValue() == null ? null : txtHex.getValue().toString();
             if (!Objects.equals(this.hex, colorHex)) {
                 if (colorHex != null) {
-                    colorPicker.getSelectionModel().setSelectedColor(decodeRGBA(colorHex));
+                    colorPicker.getModel().setSelectedColor(decodeRGBA(colorHex));
                 }
                 this.hex = colorHex;
             }
@@ -217,7 +217,7 @@ public class ColorField extends JComponent implements PropertyChangeListener {
                 this.green = green;
                 this.blue = blue;
                 this.alpha = alpha;
-                colorPicker.getSelectionModel().setSelectedColor(new Color(red, green, blue, alpha));
+                colorPicker.getModel().setSelectedColor(new Color(red, green, blue, alpha));
             }
         }
     }

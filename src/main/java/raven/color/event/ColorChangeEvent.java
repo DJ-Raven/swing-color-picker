@@ -4,14 +4,14 @@ import java.util.EventObject;
 
 public class ColorChangeEvent extends EventObject {
 
-    private final boolean hueChanged;
+    private final boolean valueChanged;
 
-    public ColorChangeEvent(Object source, boolean hueChanged) {
+    public ColorChangeEvent(Object source, boolean valueChanged) {
         super(source);
-        this.hueChanged = hueChanged;
+        this.valueChanged = valueChanged;
     }
 
-    public boolean isHueChanged() {
-        return hueChanged;
+    public boolean isValueChanged() {
+        return valueChanged;
     }
 }
