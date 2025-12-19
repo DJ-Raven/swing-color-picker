@@ -4,6 +4,7 @@
 
 ### New features and improvements
 
+- Add new ColorPipettePicker for `Windows` to picker color from screen (PR #4)
 - Available two model (PR #3)
     - `DinoColorPickerModel.java` (default)
     - `DiskColorPickerModel.java` (new model)
@@ -13,6 +14,7 @@
 - Refactor some code
 - Color preview now paint transparent background
 - Changed ColorPickerSelectionModel to ColorPickerModel
+- FlatLaf update to v3.7
 
 ## [1.0.1] - 2025-11-30
 
