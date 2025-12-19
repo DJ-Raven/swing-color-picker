@@ -33,7 +33,7 @@ public class TestColor extends JFrame {
         add(colorPicker);
 
         colorPicker.addColorChangedListener((color, event) -> {
-            // System.out.println("Color changed: " + color);
+            System.out.println("Color changed: " + color);
         });
 
         createOption();
@@ -107,6 +107,16 @@ public class TestColor extends JFrame {
 
         panelOption.add(panelModel);
 
+        // other option
+        JPanel panelOtherOption = new JPanel(new MigLayout());
+        panelOtherOption.setBorder(new TitledBorder("Other Options"));
+
+        JCheckBox chPipettePicker = new JCheckBox("Pipette Picker Enabled", true);
+        chPipettePicker.addActionListener(e -> colorPicker.setColorPipettePickerEnabled(chPipettePicker.isSelected()));
+        panelOtherOption.add(chPipettePicker);
+
+        panelOption.add(panelOtherOption);
+
         // button
         JButton cmdShowDialog = new JButton("show as dialog");
         cmdShowDialog.addActionListener(e -> {
@@ -123,10 +133,6 @@ public class TestColor extends JFrame {
         panelOption.add(cmdShowDialog, "grow 0");
 
         add(panelOption);
-    }
-
-    private void createModelOption() {
-
     }
 
     private void applyColorStyle(ColorPicker colorPicker) {
