@@ -1,7 +1,12 @@
 package raven.color;
 
+import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.formdev.flatlaf.util.SystemInfo;
 import net.miginfocom.swing.MigLayout;
 import raven.color.component.*;
+import raven.color.component.piptte.ColorPipette;
+import raven.color.component.piptte.DefaultColorPipette;
 import raven.color.component.utils.DefaultColorPaletteData;
 import raven.color.component.utils.DefaultColorPaletteItemPainter;
 import raven.color.event.ColorChangeEvent;
@@ -16,11 +21,15 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     private ColorComponent colorComponent;
     private ColorValueComponent colorValueComponent;
     private ColorAlphaComponent colorAlphaComponent;
+
+    private JPanel leftPanel;
     private ColorPreview colorPreview;
     private ColorField colorField;
     private ColorPaletteComponent colorPalette;
+    private ColorPipette colorPipette;
 
     private boolean colorPaletteEnabled = true;
+    private boolean colorPipettePickerEnabled = true;
 
     public ColorPicker() {
         this(new DinoColorPickerModel());
@@ -55,20 +64,48 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
         if (isColorPaletteEnabled()) {
             add(createColorPalette());
         }
+        if (isColorPipettePickerEnabled()) {
+            installColorPipettePicker();
+        }
         model.setSelectedColor(initialColor);
 
         setModel(model);
     }
 
     private Component createLeftComponent() {
-        JPanel panel = new JPanel(new MigLayout("insets 3"));
-        panel.setOpaque(false);
-
+        leftPanel = new JPanel(new MigLayout("insets 3"));
+        leftPanel.setOpaque(false);
         colorPreview = new ColorPreview();
+        leftPanel.add(colorPreview, "width 33,height 33");
+        return leftPanel;
+    }
 
-        panel.add(colorPreview, "width 33,height 33");
+    private void installColorPipettePicker() {
+        ColorPipette pipette = createColorPipette();
+        if (pipette != null && pipette.isAvailable()) {
+            JButton cmdPipette = new JButton(new FlatSVGIcon("raven/color/icon/pipette.svg", 0.4f));
+            cmdPipette.addActionListener(e -> {
+                pipette.setInitialColor(getSelectedColor());
+                pipette.show();
+            });
+            cmdPipette.putClientProperty(FlatClientProperties.STYLE, "" +
+                    "border:2,2,2,2,$Component.borderColor,1,10;" +
+                    "background:null;");
+            leftPanel.add(cmdPipette, "width 33,height 33", 0);
+            colorPipette = pipette;
+            repaint();
+            revalidate();
+        }
+    }
 
-        return panel;
+    private void uninstallColorPipettePicker() {
+        if (colorPipette != null) {
+            leftPanel.remove(0);
+            colorPipette.dispose();
+            colorPipette = null;
+            repaint();
+            revalidate();
+        }
     }
 
     private Component createColorPalette() {
@@ -92,6 +129,16 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
             colorPreview.setColor(model.getSelectedColor());
         }
         colorComponent.changeSelectedPoint(model.getSelectedColor());
+    }
+
+    private ColorPipette createColorPipette() {
+        if (!isColorPipettePickerEnabled()) {
+            return null;
+        }
+        if (SystemInfo.isWindows) {
+            return new DefaultColorPipette(this, (color, evt) -> setSelectedColor(color));
+        }
+        return null;
     }
 
     public ColorPickerModel getModel() {
@@ -138,6 +185,21 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
             } else {
                 add(createColorPalette());
                 revalidate();
+            }
+        }
+    }
+
+    public boolean isColorPipettePickerEnabled() {
+        return colorPipettePickerEnabled;
+    }
+
+    public void setColorPipettePickerEnabled(boolean colorPipettePickerEnabled) {
+        if (this.colorPipettePickerEnabled != colorPipettePickerEnabled) {
+            this.colorPipettePickerEnabled = colorPipettePickerEnabled;
+            if (colorPipettePickerEnabled) {
+                installColorPipettePicker();
+            } else {
+                uninstallColorPipettePicker();
             }
         }
     }
