@@ -59,8 +59,11 @@ public class DiskColorPickerModel extends AbstractColorPickerModel {
 
     @Override
     public Color locationToColor(ColorLocation location, float value) {
-        float nx = (location.getX() * 2f) - 1f;
-        float ny = (location.getY() * 2f) - 1f;
+        // round 3 decimal places
+        float roundedX = ((int) (location.getX() * 1000)) / 1000f;
+        float roundedY = ((int) (location.getY() * 1000)) / 1000f;
+        float nx = (roundedX * 2f) - 1f;
+        float ny = (roundedY * 2f) - 1f;
 
         float dist = (float) Math.sqrt(nx * nx + ny * ny);
         float sat = Math.min(dist, 1f);
