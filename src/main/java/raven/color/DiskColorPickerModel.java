@@ -54,11 +54,11 @@ public class DiskColorPickerModel extends AbstractColorPickerModel {
             ny /= dist;
         }
         loc.set((nx + 1f) / 2f, (ny + 1f) / 2f);
+        super.locationValue(loc);
     }
 
     @Override
     public Color locationToColor(ColorLocation location, float value) {
-        this.location.set(location);
         float nx = (location.getX() * 2f) - 1f;
         float ny = (location.getY() * 2f) - 1f;
 
@@ -119,17 +119,6 @@ public class DiskColorPickerModel extends AbstractColorPickerModel {
             g2.setPaint(horizontal);
             if (arc > 0) {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.fill(new RoundRectangle2D.Float(0, 0, width, height, arc, arc));
-            } else {
-                g2.fillRect(0, 0, width, height);
-            }
-            GradientPaint vertical = new GradientPaint(
-                    0, 0, new Color(255, 255, 255, 40),
-                    0, 0, new Color(0, 0, 0, 80)
-            );
-
-            g2.setPaint(vertical);
-            if (arc > 0) {
                 g2.fill(new RoundRectangle2D.Float(0, 0, width, height, arc, arc));
             } else {
                 g2.fillRect(0, 0, width, height);

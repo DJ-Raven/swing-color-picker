@@ -30,7 +30,6 @@ public class DinoColorPickerModel extends AbstractColorPickerModel {
 
     @Override
     public Color locationToColor(ColorLocation location, float value) {
-        this.location.set(location);
         return Color.getHSBColor(value, location.getX(), 1f - location.getY());
     }
 

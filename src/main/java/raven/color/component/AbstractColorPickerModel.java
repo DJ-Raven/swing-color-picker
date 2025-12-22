@@ -43,7 +43,7 @@ public abstract class AbstractColorPickerModel implements ColorPickerModel {
         if (selectedColor == null) {
             selectedColor = Color.WHITE;
         }
-        if (!Objects.equals(this.selectedColor, selectedColor)) {
+        if (notifyColor(this.selectedColor, selectedColor)) {
             boolean valueChanged = false;
             if (valueChange) {
                 this.value = colorToValue(selectedColor);
@@ -59,8 +59,13 @@ public abstract class AbstractColorPickerModel implements ColorPickerModel {
         }
     }
 
+    public boolean notifyColor(Color oldColor, Color newColor) {
+        return !Objects.equals(oldColor, newColor);
+    }
+
     @Override
     public void locationValue(ColorLocation location) {
+        this.location.set(location);
     }
 
     @Override
