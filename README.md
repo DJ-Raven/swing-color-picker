@@ -14,7 +14,7 @@ Add the dependency
 <dependency>
     <groupId>io.github.dj-raven</groupId>
     <artifactId>swing-color-picker</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
