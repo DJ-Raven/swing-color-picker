@@ -5,10 +5,12 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
 import net.miginfocom.swing.MigLayout;
 import raven.color.component.*;
+import raven.color.component.piptte.ColorPaletteType;
 import raven.color.component.piptte.ColorPipette;
 import raven.color.component.piptte.DefaultColorPipette;
-import raven.color.component.utils.DefaultColorPaletteData;
-import raven.color.component.utils.DefaultColorPaletteItemPainter;
+import raven.color.component.palette.DefaultColorPaletteData;
+import raven.color.component.palette.DefaultColorPaletteItemPainter;
+import raven.color.utils.ColorPickerModel;
 import raven.color.event.ColorChangeEvent;
 import raven.color.event.ColorChangedListener;
 
@@ -46,10 +48,10 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     private void init(ColorPickerModel model, Color initialColor) {
         setLayout(new MigLayout("wrap,fillx,gap 0,insets 0 0 5 0", "[fill,280]"));
 
-        colorComponent = new ColorComponent(this);
-        colorValueComponent = new ColorValueComponent(this);
-        colorAlphaComponent = new ColorAlphaComponent(this);
-        colorField = new ColorField(this);
+        colorComponent = new ColorComponent(model);
+        colorValueComponent = new ColorValueComponent(model);
+        colorAlphaComponent = new ColorAlphaComponent(model);
+        colorField = new ColorField(model);
 
         JPanel panel = new JPanel(new MigLayout("wrap 2,fillx,insets 0,gap 3", "7[grow 0,fill][fill]"));
 
@@ -123,12 +125,14 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
 
     private void updateColorComponent() {
         if (colorField != null) {
-            colorField.colorChanged(model.getSelectedColor());
+            colorField.setModel(model);
         }
         if (colorPreview != null) {
             colorPreview.setColor(model.getSelectedColor());
         }
-        colorComponent.changeSelectedPoint(model.getSelectedColor());
+        colorValueComponent.setModel(model);
+        colorAlphaComponent.setModel(model);
+        colorComponent.setModel(model);
     }
 
     private ColorPipette createColorPipette() {
@@ -153,6 +157,7 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
             ColorPickerModel old = this.model;
             if (old != null) {
                 old.removeChangeListener(this);
+                model.setSelectedColor(old.getSelectedColor());
             }
             this.model = model;
             this.model.addChangeListener(this);

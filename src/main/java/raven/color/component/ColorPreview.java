@@ -1,8 +1,7 @@
 package raven.color.component;
 
 import com.formdev.flatlaf.util.HiDPIUtils;
-import com.formdev.flatlaf.util.UIScale;
-import raven.color.ColorPickerUtils;
+import raven.color.utils.ColorPickerUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,8 +30,8 @@ public class ColorPreview extends JComponent {
         int width = getWidth();
         int height = getHeight();
 
-        int arc = UIScale.scale(10);
-        int border = UIScale.scale(1);
+        int arc = ColorPickerUtils.scale(10);
+        int border = ColorPickerUtils.scale(1);
 
         int innerWidth = width - border * 2;
         int innerHeight = height - border * 2;
@@ -70,6 +69,6 @@ public class ColorPreview extends JComponent {
     }
 
     protected int scale(int value, double scaleFactor) {
-        return (int) Math.ceil(UIScale.scale(value) * scaleFactor);
+        return (int) Math.ceil(ColorPickerUtils.scale(value) * scaleFactor);
     }
 }

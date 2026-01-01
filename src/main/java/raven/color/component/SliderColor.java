@@ -3,8 +3,8 @@ package raven.color.component;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.util.ColorFunctions;
 import com.formdev.flatlaf.util.HiDPIUtils;
-import com.formdev.flatlaf.util.UIScale;
-import raven.color.ColorPickerUtils;
+import raven.color.utils.ColorPickerUtils;
+import raven.color.utils.ColorLocation;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,6 +14,7 @@ import java.awt.geom.Ellipse2D;
 
 public abstract class SliderColor extends JComponent {
 
+    private final LocationChangeEvent event = new LocationChangeEvent(this);
     private final int selectedSize;
     private MouseAdapter mouseListener;
 
@@ -30,14 +31,14 @@ public abstract class SliderColor extends JComponent {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    mouseChange(e.getPoint());
+                    mouseChange(e.getPoint(), true);
                 }
             }
 
             @Override
             public void mouseDragged(MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    mouseChange(e.getPoint());
+                    mouseChange(e.getPoint(), false);
                 }
             }
         };
@@ -53,7 +54,7 @@ public abstract class SliderColor extends JComponent {
         }
     }
 
-    private void mouseChange(Point point) {
+    private void mouseChange(Point point, boolean isPressed) {
         Rectangle rec = getSlideRectangle();
         int px = point.x - rec.x;
         int py = point.y - rec.y;
@@ -61,7 +62,12 @@ public abstract class SliderColor extends JComponent {
         float vy = ((float) py) / (float) rec.height;
         vx = Math.max(0f, Math.min(1f, vx));
         vy = Math.max(0f, Math.min(1f, vy));
-        valueChanged(new ColorLocation(vx, vy));
+        ColorLocation loc = new ColorLocation(vx, vy);
+        event.reset();
+        if (isPressed) {
+            event.setPressedLocation(loc);
+        }
+        valueChanged(loc, event);
     }
 
     @Override
@@ -72,18 +78,19 @@ public abstract class SliderColor extends JComponent {
 
         HiDPIUtils.paintAtScale1x(g2, rec.x, rec.y, rec.width, rec.height, this::paint);
 
-        int size = UIScale.scale(selectedSize);
+        int size = ColorPickerUtils.scale(selectedSize);
         ColorLocation value = getValue();
-        int selectionX = (int) (rec.x + rec.width * value.getX());
-        int selectionY = (int) (rec.y + rec.height * value.getY());
+        if (value != null) {
+            int selectionX = (int) (rec.x + rec.width * value.getX());
+            int selectionY = (int) (rec.y + rec.height * value.getY());
 
-        paintSelection(g2, selectionX, selectionY, size);
-
+            paintSelection(g2, selectionX, selectionY, size);
+        }
         g2.dispose();
         super.paintComponent(g);
     }
 
-    protected abstract void valueChanged(ColorLocation value);
+    protected abstract void valueChanged(ColorLocation value, LocationChangeEvent event);
 
     protected abstract ColorLocation getValue();
 
@@ -105,7 +112,7 @@ public abstract class SliderColor extends JComponent {
         g2.fill(ColorPickerUtils.createShape(size, 0.6f, 0f));
 
         g2.setColor(getTrackColor());
-        g2.fill(ColorPickerUtils.createShape(size, 0.6f, UIScale.scale(1f)));
+        g2.fill(ColorPickerUtils.createShape(size, 0.6f, ColorPickerUtils.scale(1f)));
 
         Color selectedColor = getSelectedColor();
         if (selectedColor != null) {
@@ -117,7 +124,7 @@ public abstract class SliderColor extends JComponent {
     }
 
     protected int scale(int value, double scaleFactor) {
-        return (int) Math.ceil(UIScale.scale(value) * scaleFactor);
+        return (int) Math.ceil(ColorPickerUtils.scale(value) * scaleFactor);
     }
 
     protected Color getTrackColor() {

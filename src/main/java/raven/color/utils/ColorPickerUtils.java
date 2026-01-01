@@ -1,4 +1,6 @@
-package raven.color;
+package raven.color.utils;
+
+import com.formdev.flatlaf.util.UIScale;
 
 import java.awt.*;
 import java.awt.geom.Area;
@@ -46,5 +48,17 @@ public class ColorPickerUtils {
             }
         }
         return image;
+    }
+
+    public static float scale(float v) {
+        return UIScale.scale(v);
+    }
+
+    public static int scale(int v) {
+        return UIScale.scale(v);
+    }
+
+    public static Dimension scale(Dimension v) {
+        return UIScale.scale(v);
     }
 }

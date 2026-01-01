@@ -1,8 +1,9 @@
 package raven.color;
 
-import raven.color.component.AbstractColorPickerModel;
-import raven.color.component.ColorDimension;
-import raven.color.component.ColorLocation;
+import raven.color.component.LocationChangeEvent;
+import raven.color.utils.AbstractColorPickerModel;
+import raven.color.utils.ColorDimension;
+import raven.color.utils.ColorLocation;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
@@ -15,6 +16,7 @@ public class DiskColorPickerModel extends AbstractColorPickerModel {
     private Color oldSelectedColor;
 
     public DiskColorPickerModel() {
+        this(Color.WHITE);
     }
 
     public DiskColorPickerModel(Color color) {
@@ -44,7 +46,7 @@ public class DiskColorPickerModel extends AbstractColorPickerModel {
     }
 
     @Override
-    public void locationValue(ColorLocation loc) {
+    public void locationValue(ColorLocation loc, LocationChangeEvent event) {
         float nx = loc.getX() * 2f - 1f;
         float ny = loc.getY() * 2f - 1f;
 
@@ -54,7 +56,7 @@ public class DiskColorPickerModel extends AbstractColorPickerModel {
             ny /= dist;
         }
         loc.set((nx + 1f) / 2f, (ny + 1f) / 2f);
-        super.locationValue(loc);
+        super.locationValue(loc, event);
     }
 
     @Override
@@ -109,7 +111,7 @@ public class DiskColorPickerModel extends AbstractColorPickerModel {
         if (width <= 0 || height <= 0) {
             return;
         }
-        Color color = locationToColor(location, 1f);
+        Color color = locationToColor(getLocation(), 1f);
         if (valueImage == null || (valueImage.getWidth() != width || valueImage.getHeight() != height) || !Objects.equals(color, oldSelectedColor)) {
             valueImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
             Graphics2D g2 = valueImage.createGraphics();

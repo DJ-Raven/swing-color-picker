@@ -1,7 +1,7 @@
 package raven.color.component;
 
 import net.miginfocom.swing.MigLayout;
-import raven.color.ColorPicker;
+import raven.color.utils.ColorPickerModel;
 
 import javax.swing.*;
 import javax.swing.text.DefaultFormatter;
@@ -16,7 +16,7 @@ import java.util.Objects;
 
 public class ColorField extends JComponent implements PropertyChangeListener {
 
-    private final ColorPicker colorPicker;
+    private ColorPickerModel model;
     private JFormattedTextField txtRed;
     private JFormattedTextField txtGreen;
     private JFormattedTextField txtBlue;
@@ -30,8 +30,8 @@ public class ColorField extends JComponent implements PropertyChangeListener {
 
     private String hex;
 
-    public ColorField(ColorPicker colorPicker) {
-        this.colorPicker = colorPicker;
+    public ColorField(ColorPickerModel model) {
+        this.model = model;
         init();
     }
 
@@ -203,7 +203,7 @@ public class ColorField extends JComponent implements PropertyChangeListener {
             String colorHex = txtHex.getValue() == null ? null : txtHex.getValue().toString();
             if (!Objects.equals(this.hex, colorHex)) {
                 if (colorHex != null) {
-                    colorPicker.getModel().setSelectedColor(decodeRGBA(colorHex));
+                    getModel().setSelectedColor(decodeRGBA(colorHex));
                 }
                 this.hex = colorHex;
             }
@@ -217,8 +217,19 @@ public class ColorField extends JComponent implements PropertyChangeListener {
                 this.green = green;
                 this.blue = blue;
                 this.alpha = alpha;
-                colorPicker.getModel().setSelectedColor(new Color(red, green, blue, alpha));
+                getModel().setSelectedColor(new Color(red, green, blue, alpha));
             }
+        }
+    }
+
+    public ColorPickerModel getModel() {
+        return model;
+    }
+
+    public void setModel(ColorPickerModel model) {
+        this.model = model;
+        if (model != null) {
+            colorChanged(model.getSelectedColor());
         }
     }
 }

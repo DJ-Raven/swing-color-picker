@@ -1,6 +1,6 @@
-package raven.color.component.utils;
+package raven.color.component.palette;
 
-import com.formdev.flatlaf.util.UIScale;
+import raven.color.utils.ColorPickerUtils;
 
 import java.awt.*;
 import java.awt.geom.Area;
@@ -43,10 +43,10 @@ public class DefaultColorPaletteItemPainter implements ColorPaletteItemPainter {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setColor(color);
-        float arc = Math.min(UIScale.scale(getArc()), Math.min(width, height));
+        float arc = Math.min(ColorPickerUtils.scale(getArc()), Math.min(width, height));
         g2.fill(new RoundRectangle2D.Float(0, 0, width, height, arc, arc));
 
-        int border = UIScale.scale(getItemBorderSize());
+        int border = ColorPickerUtils.scale(getItemBorderSize());
         if (border > 0) {
             g2.translate(-border, -border);
             paintItemBorder(g2, color, width + border * 2, height + border * 2, isSelected, hasFocus);
@@ -64,13 +64,13 @@ public class DefaultColorPaletteItemPainter implements ColorPaletteItemPainter {
         }
 
         g2.setComposite(AlphaComposite.SrcOver.derive(0.35f));
-        int border = UIScale.scale(getItemBorderSize());
-        float arc = UIScale.scale(getArc() + getItemBorderSize() * 2);
+        int border = ColorPickerUtils.scale(getItemBorderSize());
+        float arc = ColorPickerUtils.scale(getArc() + getItemBorderSize() * 2);
         arc = Math.min(arc, Math.min(width, height));
         Area area = new Area(new RoundRectangle2D.Float(0, 0, width, height, arc, arc));
         int inWidth = width - border * 2;
         int inHeight = height - border * 2;
-        float inArc = Math.min(UIScale.scale(getArc()), Math.min(inWidth, inHeight));
+        float inArc = Math.min(ColorPickerUtils.scale(getArc()), Math.min(inWidth, inHeight));
 
         area.subtract(new Area(new RoundRectangle2D.Float(border, border, inWidth, inHeight, inArc, inArc)));
         g2.fill(area);

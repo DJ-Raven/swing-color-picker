@@ -1,16 +1,17 @@
 package raven.color.component;
 
 import com.formdev.flatlaf.util.ScaledEmptyBorder;
-import raven.color.ColorPicker;
+import raven.color.utils.ColorLocation;
+import raven.color.utils.ColorPickerModel;
 
 import java.awt.*;
 
 public class ColorValueComponent extends SliderColor {
 
-    private final ColorPicker colorPicker;
+    private ColorPickerModel model;
 
-    public ColorValueComponent(ColorPicker colorPicker) {
-        this.colorPicker = colorPicker;
+    public ColorValueComponent(ColorPickerModel model) {
+        this.model = model;
         install();
     }
 
@@ -21,20 +22,28 @@ public class ColorValueComponent extends SliderColor {
     }
 
     @Override
-    protected void valueChanged(ColorLocation value) {
-        colorPicker.getModel().setValue(value.getX());
+    protected void valueChanged(ColorLocation value, LocationChangeEvent event) {
+        getModel().setValue(value.getX());
     }
 
     @Override
     protected ColorLocation getValue() {
-        return new ColorLocation(colorPicker.getModel().getValue(), 0.5f);
+        return new ColorLocation(getModel().getValue(), 0.5f);
     }
 
     @Override
     protected void paint(Graphics2D g, int x, int y, int width, int height, double scaleFactor) {
-        Image image = colorPicker.getModel().getValueImage(width, height, 999);
+        Image image = getModel().getValueImage(width, height, 999);
         if (image != null) {
             g.drawImage(image, x, y, null);
         }
+    }
+
+    public ColorPickerModel getModel() {
+        return model;
+    }
+
+    public void setModel(ColorPickerModel model) {
+        this.model = model;
     }
 }

@@ -1,18 +1,20 @@
 package raven.color.component;
 
 import com.formdev.flatlaf.util.ScaledEmptyBorder;
-import raven.color.ColorPicker;
+import raven.color.utils.ColorDimension;
+import raven.color.utils.ColorLocation;
+import raven.color.utils.ColorPickerModel;
 
 import java.awt.*;
 
 public class ColorComponent extends SliderColor {
 
-    private final ColorPicker colorPicker;
+    private ColorPickerModel model;
     private ColorLocation selectedPoint;
     private boolean notifyRepaint = true;
 
-    public ColorComponent(ColorPicker colorPicker) {
-        this.colorPicker = colorPicker;
+    public ColorComponent(ColorPickerModel model) {
+        this.model = model;
         install();
     }
 
@@ -20,9 +22,7 @@ public class ColorComponent extends SliderColor {
     public void install() {
         super.install();
         setBorder(new ScaledEmptyBorder(10, 10, 10, 10));
-        if (selectedPoint == null && (colorPicker.getModel() != null && colorPicker.getModel().getSelectedColor() != null)) {
-            selectedPoint = colorPicker.getModel().colorToLocation(colorPicker.getModel().getSelectedColor());
-        }
+        changeSelectedPoint(model.getSelectedColor());
     }
 
     @Override
@@ -32,24 +32,26 @@ public class ColorComponent extends SliderColor {
     }
 
     @Override
-    protected void valueChanged(ColorLocation value) {
-        selectedPoint = value;
-        colorPicker.getModel().locationValue(selectedPoint);
-        float v = colorPicker.getModel().getValue();
-        Color color = colorPicker.getModel().locationToColor(selectedPoint, v);
-        Color oldColor = colorPicker.getModel().getSelectedColor();
-        if (oldColor != null) {
-            int alpha = oldColor.getAlpha();
-            if (alpha != 255) {
-                color = new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+    protected void valueChanged(ColorLocation value, LocationChangeEvent event) {
+        getModel().locationValue(value, event);
+        if (!event.isConsumed()) {
+            selectedPoint = value;
+            float v = getModel().getValue();
+            Color color = getModel().locationToColor(selectedPoint, v);
+            Color oldColor = getModel().getSelectedColor();
+            if (oldColor != null) {
+                int alpha = oldColor.getAlpha();
+                if (alpha != 255) {
+                    color = new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+                }
             }
-        }
-        try {
-            notifyRepaint = false;
-            colorPicker.getModel().setSelectedColor(color, false);
-        } finally {
-            repaint();
-            notifyRepaint = true;
+            try {
+                notifyRepaint = false;
+                getModel().setSelectedColor(color, false);
+            } finally {
+                repaint();
+                notifyRepaint = true;
+            }
         }
     }
 
@@ -61,7 +63,7 @@ public class ColorComponent extends SliderColor {
     @Override
     protected Rectangle getSlideRectangle() {
         Rectangle rec = super.getSlideRectangle();
-        ColorDimension size = colorPicker.getModel().getDimensionImage(rec.width, rec.height);
+        ColorDimension size = getModel().getDimensionImage(rec.width, rec.height);
         int x = (rec.width - size.width) / 2;
         int y = (rec.height - size.height) / 2;
         rec.x += x;
@@ -79,13 +81,21 @@ public class ColorComponent extends SliderColor {
         if (color == null) {
             selectedPoint = null;
         } else {
-            selectedPoint = colorPicker.getModel().colorToLocation(color);
+            selectedPoint = getModel().colorToLocation(color);
+        }
+    }
+
+    public void changeSelectedPoint(ColorLocation location) {
+        if (selectedPoint == null) {
+            selectedPoint = new ColorLocation(location);
+        } else {
+            selectedPoint.set(location);
         }
     }
 
     @Override
     protected void paint(Graphics2D g, int x, int y, int width, int height, double scaleFactor) {
-        Image image = colorPicker.getModel().getColorImage(width, height, scale(10, scaleFactor));
+        Image image = getModel().getColorImage(width, height, scale(10, scaleFactor));
         if (image != null) {
             int lx = (width - image.getWidth(null)) / 2;
             int ly = (height - image.getHeight(null)) / 2;
@@ -95,6 +105,17 @@ public class ColorComponent extends SliderColor {
 
     @Override
     protected Color getSelectedColor() {
-        return new Color(colorPicker.getModel().getSelectedColor().getRGB());
+        return new Color(getModel().getSelectedColor().getRGB());
+    }
+
+    public ColorPickerModel getModel() {
+        return model;
+    }
+
+    public void setModel(ColorPickerModel model) {
+        this.model = model;
+        if (model != null) {
+            changeSelectedPoint(model.getSelectedColor());
+        }
     }
 }

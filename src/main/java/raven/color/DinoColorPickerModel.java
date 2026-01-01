@@ -1,7 +1,7 @@
 package raven.color;
 
-import raven.color.component.AbstractColorPickerModel;
-import raven.color.component.ColorLocation;
+import raven.color.utils.AbstractColorPickerModel;
+import raven.color.utils.ColorLocation;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 public class DinoColorPickerModel extends AbstractColorPickerModel {
 
     public DinoColorPickerModel() {
+        this(Color.WHITE);
     }
 
     public DinoColorPickerModel(Color color) {
@@ -49,9 +50,13 @@ public class DinoColorPickerModel extends AbstractColorPickerModel {
     @Override
     protected float colorToValue(Color color) {
         if (color == null) {
-            return 0f;
+            return 1f;
         }
-        return Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null)[0];
+        float v = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null)[0];
+        if (v == 0) {
+            v = 1f;
+        }
+        return v;
     }
 
     protected void createValueImage(int width, int height, int arc) {

@@ -1,4 +1,4 @@
-package raven.color.component.utils;
+package raven.color.component.palette;
 
 import java.awt.*;
 

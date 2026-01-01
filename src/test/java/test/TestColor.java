@@ -4,9 +4,10 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import net.miginfocom.swing.MigLayout;
 import raven.color.ColorPicker;
+import raven.color.CorelColorPickerModel;
 import raven.color.DinoColorPickerModel;
 import raven.color.DiskColorPickerModel;
-import raven.color.component.ColorPaletteType;
+import raven.color.component.piptte.ColorPaletteType;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -87,23 +88,32 @@ public class TestColor extends JFrame {
         ButtonGroup group = new ButtonGroup();
         JRadioButton jrDino = new JRadioButton("Dino Model", true);
         JRadioButton jrDisk = new JRadioButton("Disk Model");
+        JRadioButton jrCorel = new JRadioButton("Corel Model");
 
         jrDino.addActionListener(e -> {
             if (jrDino.isSelected()) {
-                colorPicker.setModel(new DinoColorPickerModel(colorPicker.getSelectedColor()));
+                colorPicker.setModel(new DinoColorPickerModel());
             }
         });
         jrDisk.addActionListener(e -> {
             if (jrDisk.isSelected()) {
-                colorPicker.setModel(new DiskColorPickerModel(colorPicker.getSelectedColor()));
+                colorPicker.setModel(new DiskColorPickerModel());
+            }
+        });
+
+        jrCorel.addActionListener(e -> {
+            if (jrCorel.isSelected()) {
+                colorPicker.setModel(new CorelColorPickerModel());
             }
         });
 
         group.add(jrDino);
         group.add(jrDisk);
+        group.add(jrCorel);
 
         panelModel.add(jrDino);
         panelModel.add(jrDisk);
+        panelModel.add(jrCorel);
 
         panelOption.add(panelModel);
 
@@ -146,6 +156,7 @@ public class TestColor extends JFrame {
     }
 
     public static void main(String[] args) {
+        // UIScale.setZoomFactor(1.5f);
         FlatIntelliJLaf.setup();
         EventQueue.invokeLater(() -> new TestColor().setVisible(true));
     }
