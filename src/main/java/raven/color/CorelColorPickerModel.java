@@ -1,6 +1,5 @@
 package raven.color;
 
-import raven.color.component.ColorComponent;
 import raven.color.component.LocationChangeEvent;
 import raven.color.utils.ColorLocation;
 import raven.color.utils.ColorPickerUtils;
@@ -24,7 +23,6 @@ public class CorelColorPickerModel extends DiskColorPickerModel {
 
     protected ColorLocation wheelPressed = new ColorLocation();
     protected boolean isWheelPressed;
-    protected float wheelPressedAngle;
 
     protected BufferedImage slImage;
     protected BufferedImage hueWheelImage;
@@ -85,21 +83,11 @@ public class CorelColorPickerModel extends DiskColorPickerModel {
             float v = angle / 360f;
             setValue(v);
             event.consume();
-            ColorComponent colorComponent = (ColorComponent) event.getSource();
-            colorComponent.changeSelectedPoint(getLocation());
-            colorComponent.repaint();
         } else {
-            float ag = getValue() * 360 + 90;
-            loc.set(clampToTriangle(loc, ag));
-            setLocation(loc);
-            wheelPressedAngle = -1;
+            float ag = getValue() * 360;
+            loc.set(clampToTriangle(loc, ag + 90));
+            setLocation(rotate(loc.getX(), loc.getY(), -ag));
         }
-    }
-
-    @Override
-    public void setSelectedColor(Color selectedColor) {
-        super.setSelectedColor(selectedColor);
-        wheelPressedAngle = -1;
     }
 
     @Override
@@ -137,7 +125,7 @@ public class CorelColorPickerModel extends DiskColorPickerModel {
     @Override
     public ColorLocation getLocation() {
         ColorLocation location = super.getLocation();
-        float angle = getValue() * 360 - wheelPressedAngle;
+        float angle = getValue() * 360;
         return rotate(location.getX(), location.getY(), angle);
     }
 
@@ -151,6 +139,11 @@ public class CorelColorPickerModel extends DiskColorPickerModel {
             v = 1f;
         }
         return v;
+    }
+
+    @Override
+    public boolean notifySelectedLocationOnValueChanged() {
+        return true;
     }
 
     @Override
@@ -311,12 +304,6 @@ public class CorelColorPickerModel extends DiskColorPickerModel {
         float inner = 0.5f - wheelSize;
 
         isWheelPressed = dist >= inner;
-        if (isWheelPressed) {
-            if (wheelPressedAngle >= 0) {
-                setLocation(getLocation());
-            }
-            wheelPressedAngle = getValue() * 360;
-        }
         wheelPressed.set(loc);
         return isWheelPressed;
     }

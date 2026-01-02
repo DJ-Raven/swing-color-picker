@@ -5,14 +5,14 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
 import net.miginfocom.swing.MigLayout;
 import raven.color.component.*;
+import raven.color.component.palette.DefaultColorPaletteData;
+import raven.color.component.palette.DefaultColorPaletteItemPainter;
 import raven.color.component.piptte.ColorPaletteType;
 import raven.color.component.piptte.ColorPipette;
 import raven.color.component.piptte.DefaultColorPipette;
-import raven.color.component.palette.DefaultColorPaletteData;
-import raven.color.component.palette.DefaultColorPaletteItemPainter;
-import raven.color.utils.ColorPickerModel;
 import raven.color.event.ColorChangeEvent;
 import raven.color.event.ColorChangedListener;
+import raven.color.utils.ColorPickerModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -247,7 +247,7 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     public void colorChanged(Color color, ColorChangeEvent event) {
         if (colorComponent != null) {
             if (colorComponent.isNotifyRepaint()) {
-                if (!event.isValueChanged()) {
+                if (!event.isValueChanged() || getModel().notifySelectedLocationOnValueChanged()) {
                     // selected color invoked
                     // so coverts color to selected point
                     colorComponent.changeSelectedPoint(color);

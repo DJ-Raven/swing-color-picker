@@ -106,6 +106,11 @@ public abstract class AbstractColorPickerModel implements ColorPickerModel {
     }
 
     @Override
+    public boolean notifySelectedLocationOnValueChanged() {
+        return false;
+    }
+
+    @Override
     public void addChangeListener(ColorChangedListener listener) {
         listenerList.add(ColorChangedListener.class, listener);
     }

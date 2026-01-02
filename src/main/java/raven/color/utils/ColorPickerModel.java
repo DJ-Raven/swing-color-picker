@@ -29,6 +29,8 @@ public interface ColorPickerModel {
 
     ColorLocation colorToLocation(Color color);
 
+    boolean notifySelectedLocationOnValueChanged();
+
     void addChangeListener(ColorChangedListener listener);
 
     void removeChangeListener(ColorChangedListener listener);
