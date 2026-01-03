@@ -48,9 +48,9 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     private void init(ColorPickerModel model, Color initialColor) {
         setLayout(new MigLayout("wrap,fillx,gap 0,insets 0 0 5 0", "[fill,280]"));
 
-        colorComponent = new ColorComponent(model);
-        colorValueComponent = new ColorValueComponent(model);
-        colorAlphaComponent = new ColorAlphaComponent(model);
+        colorComponent = new ColorComponent(model, false);
+        colorValueComponent = new ColorValueComponent(model, false);
+        colorAlphaComponent = new ColorAlphaComponent(model, false);
         colorField = new ColorField(model);
 
         JPanel panel = new JPanel(new MigLayout("wrap 2,fillx,insets 0,gap 3", "7[grow 0,fill][fill]"));
@@ -130,9 +130,9 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
         if (colorPreview != null) {
             colorPreview.setColor(model.getSelectedColor());
         }
+        colorComponent.setModel(model);
         colorValueComponent.setModel(model);
         colorAlphaComponent.setModel(model);
-        colorComponent.setModel(model);
     }
 
     private ColorPipette createColorPipette() {
@@ -163,7 +163,6 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
             this.model.addChangeListener(this);
 
             updateColorComponent();
-            repaint();
         }
     }
 
@@ -246,20 +245,13 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     @Override
     public void colorChanged(Color color, ColorChangeEvent event) {
         if (colorComponent != null) {
-            if (colorComponent.isNotifyRepaint()) {
-                if (!event.isValueChanged() || getModel().notifySelectedLocationOnValueChanged()) {
-                    // selected color invoked
-                    // so coverts color to selected point
-                    colorComponent.changeSelectedPoint(color);
-                }
-                colorComponent.repaint();
-            }
+            colorComponent.notifyColorChanged(color, event);
         }
         if (colorValueComponent != null) {
-            colorValueComponent.repaint();
+            colorValueComponent.notifyColorChanged(color, event);
         }
         if (colorAlphaComponent != null) {
-            colorAlphaComponent.repaint();
+            colorAlphaComponent.notifyColorChanged(color, event);
         }
         if (colorPreview != null) {
             colorPreview.setColor(color);

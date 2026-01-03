@@ -1,28 +1,30 @@
 package raven.color.component;
 
 import com.formdev.flatlaf.util.ScaledEmptyBorder;
+import raven.color.event.ColorChangeEvent;
 import raven.color.utils.ColorDimension;
 import raven.color.utils.ColorLocation;
 import raven.color.utils.ColorPickerModel;
 
 import java.awt.*;
 
-public class ColorComponent extends SliderColor {
+public class ColorComponent extends SliderColorModel {
 
-    private ColorPickerModel model;
     private ColorLocation selectedPoint;
     private boolean notifyRepaint = true;
 
-    public ColorComponent(ColorPickerModel model) {
-        this.model = model;
-        install();
+    public ColorComponent(ColorPickerModel mode) {
+        super(mode);
+    }
+
+    public ColorComponent(ColorPickerModel model, boolean installModelListener) {
+        super(model, installModelListener);
     }
 
     @Override
     public void install() {
         super.install();
         setBorder(new ScaledEmptyBorder(10, 10, 10, 10));
-        changeSelectedPoint(model.getSelectedColor());
     }
 
     @Override
@@ -73,6 +75,24 @@ public class ColorComponent extends SliderColor {
         return rec;
     }
 
+    @Override
+    public void notifyColorChanged(Color color, ColorChangeEvent event) {
+        if (isNotifyRepaint()) {
+            if (!event.isValueChanged() || getModel().notifySelectedLocationOnValueChanged()) {
+                // selected color invoked
+                // so coverts color to selected point
+                changeSelectedPoint(color);
+            }
+            repaint();
+        }
+    }
+
+    @Override
+    public void notifyModelChanged(ColorPickerModel model) {
+        changeSelectedPoint(model.getSelectedColor());
+        repaint();
+    }
+
     public boolean isNotifyRepaint() {
         return notifyRepaint;
     }
@@ -82,14 +102,6 @@ public class ColorComponent extends SliderColor {
             selectedPoint = null;
         } else {
             selectedPoint = getModel().colorToLocation(color);
-        }
-    }
-
-    public void changeSelectedPoint(ColorLocation location) {
-        if (selectedPoint == null) {
-            selectedPoint = new ColorLocation(location);
-        } else {
-            selectedPoint.set(location);
         }
     }
 
@@ -106,16 +118,5 @@ public class ColorComponent extends SliderColor {
     @Override
     protected Color getSelectedColor() {
         return new Color(getModel().getSelectedColor().getRGB());
-    }
-
-    public ColorPickerModel getModel() {
-        return model;
-    }
-
-    public void setModel(ColorPickerModel model) {
-        this.model = model;
-        if (model != null) {
-            changeSelectedPoint(model.getSelectedColor());
-        }
     }
 }

@@ -1,28 +1,37 @@
 package raven.color.component;
 
 import com.formdev.flatlaf.util.ScaledEmptyBorder;
-import raven.color.utils.ColorPickerUtils;
+import raven.color.event.ColorChangeEvent;
 import raven.color.utils.ColorLocation;
 import raven.color.utils.ColorPickerModel;
+import raven.color.utils.ColorPickerUtils;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
-public class ColorAlphaComponent extends SliderColor {
+public class ColorAlphaComponent extends SliderColorModel {
 
-    private ColorPickerModel model;
     private BufferedImage image;
 
     public ColorAlphaComponent(ColorPickerModel model) {
-        this.model = model;
-        install();
+        super(model);
+    }
+
+    public ColorAlphaComponent(ColorPickerModel model, boolean installModelListener) {
+        super(model, installModelListener);
     }
 
     @Override
     public void install() {
         super.install();
         setBorder(new ScaledEmptyBorder(5, 10, 5, 10));
+    }
+
+    @Override
+    public void uninstall() {
+        super.uninstall();
+        image = null;
     }
 
     @Override
@@ -37,6 +46,16 @@ public class ColorAlphaComponent extends SliderColor {
     protected ColorLocation getValue() {
         Color color = getModel().getSelectedColor();
         return new ColorLocation(color.getAlpha() / 255f, 0.5f);
+    }
+
+    @Override
+    public void notifyColorChanged(Color color, ColorChangeEvent event) {
+        repaint();
+    }
+
+    @Override
+    public void notifyModelChanged(ColorPickerModel model) {
+        repaint();
     }
 
     @Override
@@ -58,13 +77,5 @@ public class ColorAlphaComponent extends SliderColor {
             image = ColorPickerUtils.createTransparentImage(getBackground(), scale(5, scaleFactor), width, height, height);
         }
         return image;
-    }
-
-    public ColorPickerModel getModel() {
-        return model;
-    }
-
-    public void setModel(ColorPickerModel model) {
-        this.model = model;
     }
 }
