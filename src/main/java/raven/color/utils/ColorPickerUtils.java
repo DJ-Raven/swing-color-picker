@@ -61,4 +61,8 @@ public class ColorPickerUtils {
     public static Dimension scale(Dimension v) {
         return UIScale.scale(v);
     }
+
+    public static Insets scale(Insets v) {
+        return UIScale.scale(v);
+    }
 }

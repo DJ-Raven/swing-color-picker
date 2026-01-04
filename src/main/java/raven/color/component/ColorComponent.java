@@ -1,6 +1,5 @@
 package raven.color.component;
 
-import com.formdev.flatlaf.util.ScaledEmptyBorder;
 import raven.color.event.ColorChangeEvent;
 import raven.color.utils.ColorDimension;
 import raven.color.utils.ColorLocation;
@@ -24,7 +23,7 @@ public class ColorComponent extends SliderColorModel {
     @Override
     public void install() {
         super.install();
-        setBorder(new ScaledEmptyBorder(10, 10, 10, 10));
+        setSliderInsets(new Insets(10, 10, 10, 10));
     }
 
     @Override

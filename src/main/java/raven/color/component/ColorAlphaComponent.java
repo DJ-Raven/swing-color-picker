@@ -1,6 +1,5 @@
 package raven.color.component;
 
-import com.formdev.flatlaf.util.ScaledEmptyBorder;
 import raven.color.event.ColorChangeEvent;
 import raven.color.utils.ColorLocation;
 import raven.color.utils.ColorPickerModel;
@@ -10,7 +9,7 @@ import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
-public class ColorAlphaComponent extends SliderColorModel {
+public class ColorAlphaComponent extends OrientationSliderColorModel {
 
     private BufferedImage image;
 
@@ -22,10 +21,8 @@ public class ColorAlphaComponent extends SliderColorModel {
         super(model, installModelListener);
     }
 
-    @Override
-    public void install() {
-        super.install();
-        setBorder(new ScaledEmptyBorder(5, 10, 5, 10));
+    public ColorAlphaComponent(ColorPickerModel model, Orientation orientation) {
+        super(model, orientation);
     }
 
     @Override
@@ -36,6 +33,7 @@ public class ColorAlphaComponent extends SliderColorModel {
 
     @Override
     protected void valueChanged(ColorLocation value, LocationChangeEvent event) {
+        value = orientationValue(value);
         Color color = getModel().getSelectedColor();
         if (color != null) {
             getModel().setSelectedColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), (int) (value.getX() * 255f)), false);
@@ -45,7 +43,7 @@ public class ColorAlphaComponent extends SliderColorModel {
     @Override
     protected ColorLocation getValue() {
         Color color = getModel().getSelectedColor();
-        return new ColorLocation(color.getAlpha() / 255f, 0.5f);
+        return orientationValue(new ColorLocation(color.getAlpha() / 255f, 0.5f));
     }
 
     @Override
@@ -60,10 +58,16 @@ public class ColorAlphaComponent extends SliderColorModel {
 
     @Override
     protected void paint(Graphics2D g, int x, int y, int width, int height, double scaleFactor) {
+        boolean isHorizontal = isHorizontal();
         BufferedImage img = createTransparentImage(width, height, scaleFactor);
         if (img != null) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            if (!isHorizontal) {
+                float centerX = x + height / 2f;
+                float centerY = y + height / 2f;
+                g2.rotate(Math.toRadians(90), centerX, centerY);
+            }
             g2.drawImage(img, x, y, null);
             Color color = new Color(getModel().getSelectedColor().getRGB());
             g2.setPaint(new GradientPaint(x, y, new Color(255, 255, 255, 0), x + width, y, color));
