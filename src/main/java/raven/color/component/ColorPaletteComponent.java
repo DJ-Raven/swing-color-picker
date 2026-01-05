@@ -2,9 +2,9 @@ package raven.color.component;
 
 import com.formdev.flatlaf.util.ScaledEmptyBorder;
 import com.formdev.flatlaf.util.UIScale;
-import raven.color.utils.ColorPickerUtils;
 import raven.color.component.palette.ColorPaletteData;
 import raven.color.component.palette.ColorPaletteItemPainter;
+import raven.color.utils.ColorPickerUtils;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -15,7 +15,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ColorPaletteComponent extends JComponent {
+public class ColorPaletteComponent extends ColorElement {
 
     private final List<Item> items = new ArrayList<>();
     private ColorPaletteData colorData;
@@ -31,7 +31,7 @@ public class ColorPaletteComponent extends JComponent {
     }
 
     private void init() {
-        setBorder(new ScaledEmptyBorder(10, 10, 5, 10));
+        setBorder(new ScaledEmptyBorder(6, 10, 6, 10));
         MouseAdapter mouseListener = new MouseAdapter() {
 
             @Override

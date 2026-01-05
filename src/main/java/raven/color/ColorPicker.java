@@ -24,7 +24,7 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     private ColorValueComponent colorValueComponent;
     private ColorAlphaComponent colorAlphaComponent;
 
-    private JPanel leftPanel;
+    private ColorElement leftPanel;
     private ColorPreview colorPreview;
     private ColorField colorField;
     private ColorPaletteComponent colorPalette;
@@ -46,14 +46,14 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     }
 
     private void init(ColorPickerModel model, Color initialColor) {
-        setLayout(new MigLayout("wrap,fillx,gap 0,insets 0 0 5 0", "[fill,280]"));
+        setLayout(new MigLayout("wrap,fillx,gap 3,insets 0", "[fill,280]"));
 
         colorComponent = new ColorComponent(model, false);
         colorValueComponent = new ColorValueComponent(model, false);
         colorAlphaComponent = new ColorAlphaComponent(model, false);
         colorField = new ColorField(model);
 
-        JPanel panel = new JPanel(new MigLayout("wrap 2,fillx,insets 3 0 3 0,gap 3", "7[grow 0,fill][fill]"));
+        ColorElement panel = new ColorElement(new MigLayout("wrap 2,fillx,insets 0,gap 3", "7[grow 0,fill][fill]"));
 
         panel.setOpaque(false);
         add(colorComponent, "height 50:180:");
@@ -75,8 +75,7 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     }
 
     private Component createLeftComponent() {
-        leftPanel = new JPanel(new MigLayout("insets 3"));
-        leftPanel.setOpaque(false);
+        leftPanel = new ColorElement(new MigLayout("insets 3"));
         colorPreview = new ColorPreview();
         leftPanel.add(colorPreview, "width 33,height 33");
         return leftPanel;

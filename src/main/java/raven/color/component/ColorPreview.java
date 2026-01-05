@@ -9,7 +9,7 @@ import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
-public class ColorPreview extends JComponent {
+public class ColorPreview extends ColorElement {
 
     public Color getColor() {
         return color;

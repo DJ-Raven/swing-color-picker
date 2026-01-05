@@ -14,7 +14,7 @@ import java.beans.PropertyChangeListener;
 import java.text.ParseException;
 import java.util.Objects;
 
-public class ColorField extends JComponent implements PropertyChangeListener {
+public class ColorField extends ColorElement implements PropertyChangeListener {
 
     private ColorPickerModel model;
     private JFormattedTextField txtRed;

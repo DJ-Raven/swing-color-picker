@@ -12,7 +12,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 
-public abstract class SliderColor extends JComponent {
+public abstract class SliderColor extends ColorElement {
 
     private final LocationChangeEvent event = new LocationChangeEvent(this);
     private int selectedSize;
