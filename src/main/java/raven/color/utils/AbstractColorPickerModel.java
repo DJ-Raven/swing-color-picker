@@ -111,6 +111,11 @@ public abstract class AbstractColorPickerModel implements ColorPickerModel {
     }
 
     @Override
+    public boolean showValueComponent() {
+        return true;
+    }
+
+    @Override
     public void addChangeListener(ColorChangedListener listener) {
         listenerList.add(ColorChangedListener.class, listener);
     }

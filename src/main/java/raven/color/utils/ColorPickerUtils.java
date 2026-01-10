@@ -1,7 +1,9 @@
 package raven.color.utils;
 
+import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.UIScale;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
@@ -10,6 +12,14 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
 public class ColorPickerUtils {
+
+    public static Insets getVisualPadding(JComponent c) {
+        int focus = (int) FlatUIUtils.getBorderFocusWidth(c);
+        if (focus == 0) {
+            return null;
+        }
+        return new Insets(focus, focus, focus, focus);
+    }
 
     public static Shape createShape(float size, float border, float margin) {
         Area area = new Area(new Ellipse2D.Float(margin, margin, size - margin * 2f, size - margin * 2f));

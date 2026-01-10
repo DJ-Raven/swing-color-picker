@@ -147,6 +147,11 @@ public class CorelColorPickerModel extends DiskColorPickerModel {
     }
 
     @Override
+    public boolean showValueComponent() {
+        return false;
+    }
+
+    @Override
     protected void createValueImage(int width, int height, int arc) {
     }
 

@@ -3,7 +3,6 @@ package raven.color;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
-import net.miginfocom.swing.MigLayout;
 import raven.color.component.*;
 import raven.color.component.palette.DefaultColorPaletteData;
 import raven.color.component.palette.DefaultColorPaletteItemPainter;
@@ -12,7 +11,10 @@ import raven.color.component.piptte.ColorPipette;
 import raven.color.component.piptte.DefaultColorPipette;
 import raven.color.event.ColorChangeEvent;
 import raven.color.event.ColorChangedListener;
+import raven.color.utils.ColorPickerLayout;
 import raven.color.utils.ColorPickerModel;
+import raven.color.utils.DefaultColorPickerLayout;
+import raven.color.utils.OtherComponentLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,11 +26,12 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     private ColorValueComponent colorValueComponent;
     private ColorAlphaComponent colorAlphaComponent;
 
-    private ColorElement leftPanel;
+    private ColorElement colorOtherComponent;
     private ColorPreview colorPreview;
     private ColorField colorField;
     private ColorPaletteComponent colorPalette;
     private ColorPipette colorPipette;
+    private ColorPickerLayout colorPickerLayout;
 
     private boolean colorPaletteEnabled = true;
     private boolean colorPipettePickerEnabled = true;
@@ -38,47 +41,41 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     }
 
     public ColorPicker(Color initialColor) {
-        init(new DinoColorPickerModel(), initialColor);
+        this(new DinoColorPickerModel(initialColor));
     }
 
     public ColorPicker(ColorPickerModel model) {
-        init(model, model.getSelectedColor());
+        super(new DefaultColorPickerLayout());
+        init(model);
     }
 
-    private void init(ColorPickerModel model, Color initialColor) {
-        setLayout(new MigLayout("wrap,fillx,gap 3,insets 0", "[fill,280]"));
-
+    private void init(ColorPickerModel model) {
         colorComponent = new ColorComponent(model, false);
         colorValueComponent = new ColorValueComponent(model, false);
         colorAlphaComponent = new ColorAlphaComponent(model, false);
         colorField = new ColorField(model);
 
-        ColorElement panel = new ColorElement(new MigLayout("wrap 2,fillx,insets 0,gap 3", "7[grow 0,fill][fill]"));
-
-        panel.setOpaque(false);
-        add(colorComponent, "height 50:180:");
-        panel.add(createLeftComponent(), "span 1 2");
-        panel.add(colorValueComponent);
-        panel.add(colorAlphaComponent);
-        add(panel);
-
+        add(colorComponent);
+        add(createOtherComponent());
+        add(colorValueComponent);
+        add(colorAlphaComponent);
         add(colorField);
+
         if (isColorPaletteEnabled()) {
             add(createColorPalette());
         }
         if (isColorPipettePickerEnabled()) {
             installColorPipettePicker();
         }
-        model.setSelectedColor(initialColor);
-
         setModel(model);
+        installLayoutComponent();
     }
 
-    private Component createLeftComponent() {
-        leftPanel = new ColorElement(new MigLayout("insets 3"));
+    private Component createOtherComponent() {
+        colorOtherComponent = new ColorElement(new OtherComponentLayout());
         colorPreview = new ColorPreview();
-        leftPanel.add(colorPreview, "width 33,height 33");
-        return leftPanel;
+        colorOtherComponent.add(colorPreview);
+        return colorOtherComponent;
     }
 
     private void installColorPipettePicker() {
@@ -89,10 +86,8 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
                 pipette.setInitialColor(getSelectedColor());
                 pipette.show();
             });
-            cmdPipette.putClientProperty(FlatClientProperties.STYLE, "" +
-                    "border:2,2,2,2,$Component.borderColor,1,10;" +
-                    "background:null;");
-            leftPanel.add(cmdPipette, "width 33,height 33", 0);
+            cmdPipette.putClientProperty(FlatClientProperties.STYLE, "border:2,2,2,2,$Component.borderColor,1,10;background:null;");
+            colorOtherComponent.add(cmdPipette, 0);
             colorPipette = pipette;
             repaint();
             revalidate();
@@ -101,7 +96,7 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
 
     private void uninstallColorPipettePicker() {
         if (colorPipette != null) {
-            leftPanel.remove(0);
+            colorOtherComponent.remove(0);
             colorPipette.dispose();
             colorPipette = null;
             repaint();
@@ -132,6 +127,15 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
         colorComponent.setModel(model);
         colorValueComponent.setModel(model);
         colorAlphaComponent.setModel(model);
+
+        if (model.showValueComponent()) {
+            add(colorValueComponent);
+            getColorPickerLayout().setColorValue(colorValueComponent);
+        } else {
+            remove(colorValueComponent);
+            getColorPickerLayout().setColorValue(null);
+        }
+        revalidate();
     }
 
     private ColorPipette createColorPipette() {
@@ -183,10 +187,12 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
             if (!enabled) {
                 if (colorPalette != null) {
                     remove(colorPalette);
+                    getColorPickerLayout().setColorPalette(null);
                     revalidate();
                 }
             } else {
                 add(createColorPalette());
+                getColorPickerLayout().setColorPalette(colorPalette);
                 revalidate();
             }
         }
@@ -209,6 +215,34 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
 
     public ColorPaletteComponent getColorPalette() {
         return colorPalette;
+    }
+
+    public ColorPickerLayout getColorPickerLayout() {
+        return colorPickerLayout;
+    }
+
+    public void setColorPickerLayout(ColorPickerLayout colorPickerLayout) {
+        if (colorPickerLayout == null) {
+            throw new IllegalArgumentException("color layout can't be null");
+        }
+        if (this.colorPickerLayout != colorPickerLayout) {
+            if (this.colorPickerLayout != null) {
+                uninstallLayoutComponent();
+            }
+            this.colorPickerLayout = colorPickerLayout;
+            installLayoutComponent();
+            super.setLayout(this.colorPickerLayout);
+            repaint();
+            revalidate();
+        }
+    }
+
+    @Override
+    public void setLayout(LayoutManager layout) {
+        if (!(layout instanceof ColorPickerLayout)) {
+            throw new ClassCastException("layout of ColorPicker must be a ColorPickerLayout");
+        }
+        setColorPickerLayout((ColorPickerLayout) layout);
     }
 
     public void applyColorPaletteType(ColorPaletteType type) {
@@ -268,5 +302,20 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
                 ((ColorChangedListener) listeners[i + 1]).colorChanged(getSelectedColor(), event);
             }
         }
+    }
+
+    private void installLayoutComponent() {
+        colorPickerLayout.setColorElement(colorComponent, getColorComponentForLayout(), colorAlphaComponent, colorOtherComponent, colorField, colorPalette);
+    }
+
+    private void uninstallLayoutComponent() {
+        colorPickerLayout.setColorElement(null, null, null, null, null, null);
+    }
+
+    private ColorElement getColorComponentForLayout() {
+        if (getModel() == null || getModel().showValueComponent()) {
+            return colorValueComponent;
+        }
+        return null;
     }
 }

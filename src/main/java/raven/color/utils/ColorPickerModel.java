@@ -31,6 +31,8 @@ public interface ColorPickerModel {
 
     boolean notifySelectedLocationOnValueChanged();
 
+    boolean showValueComponent();
+
     void addChangeListener(ColorChangedListener listener);
 
     void removeChangeListener(ColorChangedListener listener);
