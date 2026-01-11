@@ -17,6 +17,7 @@ import java.util.Objects;
 
 public class ColorField extends ColorElement implements PropertyChangeListener {
 
+    private boolean colorAlphaEnabled = true;
     private ColorPickerModel model;
     private JFormattedTextField txtRed;
     private JFormattedTextField txtGreen;
@@ -170,7 +171,20 @@ public class ColorField extends ColorElement implements PropertyChangeListener {
     }
 
     private String colorToHex(Color color) {
-        return String.format("%02X%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+        String format = isColorAlphaEnabled()
+                ? "%02X%02X%02X%02X"
+                : "%02X%02X%02X";
+
+        return isColorAlphaEnabled()
+                ? String.format(format,
+                color.getRed(),
+                color.getGreen(),
+                color.getBlue(),
+                color.getAlpha())
+                : String.format(format,
+                color.getRed(),
+                color.getGreen(),
+                color.getBlue());
     }
 
     private Color decodeRGBA(String hex) {
@@ -247,6 +261,24 @@ public class ColorField extends ColorElement implements PropertyChangeListener {
         }
     }
 
+    public boolean isColorAlphaEnabled() {
+        return colorAlphaEnabled;
+    }
+
+    public void setColorAlphaEnabled(boolean colorAlphaEnabled) {
+        if (this.colorAlphaEnabled != colorAlphaEnabled) {
+            this.colorAlphaEnabled = colorAlphaEnabled;
+            if (isColorAlphaEnabled()) {
+                add(lbAlpha);
+                add(txtAlpha);
+            } else {
+                remove(lbAlpha);
+                remove(txtAlpha);
+            }
+            colorChanged(model.getSelectedColor());
+        }
+    }
+
     private class ColorFieldLayout implements LayoutManager {
 
         private static final int H_GAP = 7;
@@ -279,8 +311,15 @@ public class ColorField extends ColorElement implements PropertyChangeListener {
             int width = insets.left + insets.right;
             int height = insets.top + insets.bottom;
             int vGap = ColorPickerUtils.scale(V_GAP);
-            Dimension labelSize = calculate(lbRed, lbGreen, lbBlue, lbAlpha, lbHex);
-            Dimension fieldSize = calculate(txtRed, txtGreen, txtBlue, txtAlpha, txtHex);
+            Dimension labelSize;
+            Dimension fieldSize;
+            if (colorAlphaEnabled) {
+                labelSize = calculate(lbRed, lbGreen, lbBlue, lbAlpha, lbHex);
+                fieldSize = calculate(txtRed, txtGreen, txtBlue, txtAlpha, txtHex);
+            } else {
+                labelSize = calculate(lbRed, lbGreen, lbBlue, lbHex);
+                fieldSize = calculate(txtRed, txtGreen, txtBlue, txtHex);
+            }
             height += labelSize.height + fieldSize.height + vGap;
             width += Math.max(labelSize.width, fieldSize.width);
             return new Dimension(width, height);
@@ -317,7 +356,9 @@ public class ColorField extends ColorElement implements PropertyChangeListener {
                 x += layoutComponent(lbRed, txtRed, x, y, -1, vGap) + hGap;
                 x += layoutComponent(lbGreen, txtGreen, x, y, -1, vGap) + hGap;
                 x += layoutComponent(lbBlue, txtBlue, x, y, -1, vGap) + hGap;
-                x += layoutComponent(lbAlpha, txtAlpha, x, y, -1, vGap) + hGap;
+                if (colorAlphaEnabled) {
+                    x += layoutComponent(lbAlpha, txtAlpha, x, y, -1, vGap) + hGap;
+                }
 
                 int w = width - (x - insets.left);
                 layoutComponent(lbHex, txtHex, x, y, w, vGap);

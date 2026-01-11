@@ -35,6 +35,7 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
 
     private boolean colorPaletteEnabled = true;
     private boolean colorPipettePickerEnabled = true;
+    private boolean colorAlphaEnabled = true;
 
     public ColorPicker() {
         this(new DinoColorPickerModel());
@@ -135,6 +136,7 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
             remove(colorValueComponent);
             getColorPickerLayout().setColorValue(null);
         }
+        repaint();
         revalidate();
     }
 
@@ -209,6 +211,32 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
                 installColorPipettePicker();
             } else {
                 uninstallColorPipettePicker();
+            }
+        }
+    }
+
+    public boolean isColorAlphaEnabled() {
+        return colorAlphaEnabled;
+    }
+
+    public void setColorAlphaEnabled(boolean colorAlphaEnabled) {
+        if (this.colorAlphaEnabled != colorAlphaEnabled) {
+            this.colorAlphaEnabled = colorAlphaEnabled;
+            if (colorField != null) {
+                if (colorAlphaEnabled) {
+                    add(colorAlphaComponent);
+                    getColorPickerLayout().setColorAlpha(colorAlphaComponent);
+                } else {
+                    Color color = model.getSelectedColor();
+                    if (color.getAlpha() < 255) {
+                        model.setSelectedColor(new Color(color.getRGB()));
+                    }
+                    remove(colorAlphaComponent);
+                    getColorPickerLayout().setColorAlpha(null);
+                }
+                colorField.setColorAlphaEnabled(colorAlphaEnabled);
+                repaint();
+                revalidate();
             }
         }
     }
@@ -305,7 +333,7 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     }
 
     private void installLayoutComponent() {
-        colorPickerLayout.setColorElement(colorComponent, getColorComponentForLayout(), colorAlphaComponent, colorOtherComponent, colorField, colorPalette);
+        colorPickerLayout.setColorElement(colorComponent, getColorComponentForLayout(), getColorAlphaComponentForLayout(), colorOtherComponent, colorField, colorPalette);
     }
 
     private void uninstallLayoutComponent() {
@@ -315,6 +343,13 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     private ColorElement getColorComponentForLayout() {
         if (getModel() == null || getModel().showValueComponent()) {
             return colorValueComponent;
+        }
+        return null;
+    }
+
+    private ColorElement getColorAlphaComponentForLayout() {
+        if (isColorAlphaEnabled()) {
+            return colorAlphaComponent;
         }
         return null;
     }
