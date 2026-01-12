@@ -86,7 +86,7 @@ public class CorelColorPickerModel extends DiskColorPickerModel {
         } else {
             float ag = getValue() * 360;
             loc.set(clampToTriangle(loc, ag + 90));
-            setLocation(rotate(loc.getX(), loc.getY(), -ag));
+            setLocation(loc);
         }
     }
 
@@ -127,6 +127,12 @@ public class CorelColorPickerModel extends DiskColorPickerModel {
         ColorLocation location = super.getLocation();
         float angle = getValue() * 360;
         return rotate(location.getX(), location.getY(), angle);
+    }
+
+    @Override
+    public void setLocation(ColorLocation location) {
+        float ag = getValue() * 360;
+        super.setLocation(rotate(location.getX(), location.getY(), -ag));
     }
 
     @Override

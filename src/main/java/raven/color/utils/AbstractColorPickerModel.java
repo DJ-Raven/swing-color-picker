@@ -48,7 +48,7 @@ public abstract class AbstractColorPickerModel implements ColorPickerModel {
             boolean valueChanged = false;
             if (valueChange) {
                 this.value = colorToValue(selectedColor);
-                this.location.set(colorToLocation(selectedColor));
+                setLocation(colorToLocation(selectedColor));
             } else {
                 // check is only alpha changed
                 if (isAlphaChangedOnly(this.selectedColor, selectedColor)) {
