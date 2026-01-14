@@ -3,10 +3,7 @@ package test;
 import com.formdev.flatlaf.*;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
-import raven.color.ColorPicker;
-import raven.color.CorelColorPickerModel;
-import raven.color.DinoColorPickerModel;
-import raven.color.DiskColorPickerModel;
+import raven.color.*;
 import raven.color.component.piptte.ColorPaletteType;
 import test.utils.LineLayout;
 
@@ -126,10 +123,10 @@ public class TestColor extends JFrame {
         panelModel.setBorder(new TitledBorder("Options Color Model"));
 
         ButtonGroup group = new ButtonGroup();
-        JRadioButton jrDino = new JRadioButton("Dino Model", true);
-        JRadioButton jrDisk = new JRadioButton("Disk Model");
-        JRadioButton jrCorel = new JRadioButton("Corel Model");
-
+        JRadioButton jrDino = new JRadioButton("Dino", true);
+        JRadioButton jrDisk = new JRadioButton("Disk");
+        JRadioButton jrCorelTriangle = new JRadioButton("Corel Triangle");
+        JRadioButton jrCorelSquare = new JRadioButton("Corel Square");
         jrDino.addActionListener(e -> {
             if (jrDino.isSelected()) {
                 colorPicker.setModel(new DinoColorPickerModel());
@@ -141,19 +138,26 @@ public class TestColor extends JFrame {
             }
         });
 
-        jrCorel.addActionListener(e -> {
-            if (jrCorel.isSelected()) {
-                colorPicker.setModel(new CorelColorPickerModel());
+        jrCorelTriangle.addActionListener(e -> {
+            if (jrCorelTriangle.isSelected()) {
+                colorPicker.setModel(new CorelTriangleColorPickerModel());
+            }
+        });
+        jrCorelSquare.addActionListener(e -> {
+            if (jrCorelSquare.isSelected()) {
+                colorPicker.setModel(new CorelSquareColorPickerModel());
             }
         });
 
         group.add(jrDino);
         group.add(jrDisk);
-        group.add(jrCorel);
+        group.add(jrCorelTriangle);
+        group.add(jrCorelSquare);
 
         panelModel.add(jrDino);
         panelModel.add(jrDisk);
-        panelModel.add(jrCorel);
+        panelModel.add(jrCorelTriangle);
+        panelModel.add(jrCorelSquare);
 
         panelOption.add(panelModel);
 

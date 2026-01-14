@@ -162,15 +162,19 @@ public class DiskColorPickerModel extends AbstractColorPickerModel {
                 }
             }
             g2.dispose();
-            colorImage = roundImage(image);
+            colorImage = maskImage(image, createColorMaskShape(image.getWidth(), image.getHeight()));
         }
     }
 
-    protected BufferedImage roundImage(BufferedImage image) {
+    protected Shape createColorMaskShape(int width, int height) {
+        return new Ellipse2D.Float(0, 0, width, height);
+    }
+
+    protected BufferedImage maskImage(BufferedImage image, Shape shape) {
         BufferedImage img = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = img.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.fill(new Ellipse2D.Float(0, 0, image.getWidth(), image.getHeight()));
+        g2.fill(shape);
         g2.setComposite(AlphaComposite.SrcIn);
         g2.drawImage(image, 0, 0, null);
         g2.dispose();
