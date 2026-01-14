@@ -36,6 +36,7 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     private boolean colorPaletteEnabled = true;
     private boolean colorPipettePickerEnabled = true;
     private boolean colorAlphaEnabled = true;
+    private boolean colorPreviewEnabled = true;
 
     public ColorPicker() {
         this(new DinoColorPickerModel());
@@ -75,7 +76,9 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     private Component createOtherComponent() {
         colorOtherComponent = new ColorElement(new OtherComponentLayout());
         colorPreview = new ColorPreview();
-        colorOtherComponent.add(colorPreview);
+        if (isColorPreviewEnabled()) {
+            colorOtherComponent.add(colorPreview);
+        }
         return colorOtherComponent;
     }
 
@@ -190,11 +193,13 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
                 if (colorPalette != null) {
                     remove(colorPalette);
                     getColorPickerLayout().setColorPalette(null);
+                    repaint();
                     revalidate();
                 }
             } else {
                 add(createColorPalette());
                 getColorPickerLayout().setColorPalette(colorPalette);
+                repaint();
                 revalidate();
             }
         }
@@ -212,6 +217,7 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
             } else {
                 uninstallColorPipettePicker();
             }
+            updateColorOtherComponentLayout();
         }
     }
 
@@ -238,6 +244,22 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
                 repaint();
                 revalidate();
             }
+        }
+    }
+
+    public boolean isColorPreviewEnabled() {
+        return colorPreviewEnabled;
+    }
+
+    public void setColorPreviewEnabled(boolean colorPreviewEnabled) {
+        if (this.colorPreviewEnabled != colorPreviewEnabled) {
+            this.colorPreviewEnabled = colorPreviewEnabled;
+            if (colorPreviewEnabled) {
+                colorOtherComponent.add(colorPreview, colorOtherComponent.getComponentCount());
+            } else {
+                colorOtherComponent.remove(colorPreview);
+            }
+            updateColorOtherComponentLayout();
         }
     }
 
@@ -333,11 +355,23 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     }
 
     private void installLayoutComponent() {
-        colorPickerLayout.setColorElement(colorComponent, getColorComponentForLayout(), getColorAlphaComponentForLayout(), colorOtherComponent, colorField, colorPalette);
+        colorPickerLayout.setColorElement(colorComponent, getColorComponentForLayout(), getColorAlphaComponentForLayout(), getColorOtherComponentForLayout(), colorField, colorPalette);
     }
 
     private void uninstallLayoutComponent() {
         colorPickerLayout.setColorElement(null, null, null, null, null, null);
+    }
+
+    private void updateColorOtherComponentLayout() {
+        if (colorPipette != null || isColorPreviewEnabled()) {
+            add(colorOtherComponent);
+            getColorPickerLayout().setColorOtherComponent(colorOtherComponent);
+        } else {
+            remove(colorOtherComponent);
+            getColorPickerLayout().setColorOtherComponent(null);
+        }
+        repaint();
+        revalidate();
     }
 
     private ColorElement getColorComponentForLayout() {
@@ -350,6 +384,13 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     private ColorElement getColorAlphaComponentForLayout() {
         if (isColorAlphaEnabled()) {
             return colorAlphaComponent;
+        }
+        return null;
+    }
+
+    private ColorElement getColorOtherComponentForLayout() {
+        if (colorPipette != null || isColorPreviewEnabled()) {
+            return colorOtherComponent;
         }
         return null;
     }

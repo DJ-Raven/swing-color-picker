@@ -76,21 +76,27 @@ public class DefaultColorPickerLayout extends ColorPickerLayout {
             }
 
             // other component
+            int sliderHeight = getSliderHeight(gap);
+            int maxOtherHeight = sliderHeight;
             int otherWidth = 0;
             int otherHeight = 0;
             if (colorOtherComponent != null) {
                 Dimension otherSize = colorOtherComponent.getPreferredSize();
                 int cw = Math.min(otherSize.width, width);
                 int add = scale(7);
+                int otherY = y;
                 otherWidth = cw + gap + add;
                 otherHeight = otherSize.height;
-                colorOtherComponent.setBounds(x + add, y, cw, otherSize.height);
+                if (otherHeight <= sliderHeight) {
+                    otherY += (sliderHeight - otherHeight) / 2;
+                } else {
+                    maxOtherHeight = otherHeight;
+                }
+                colorOtherComponent.setBounds(x + add, otherY, cw, otherSize.height);
             }
 
             // color value component
-            int sliderHeight = getSliderHeight(gap);
-
-            int sliderY = y + (otherHeight - sliderHeight) / 2;
+            int sliderY = y + (maxOtherHeight - sliderHeight) / 2;
 
             if (colorValue != null) {
                 int cw = Math.max(width - otherWidth, 0);

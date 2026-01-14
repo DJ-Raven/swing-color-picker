@@ -167,10 +167,13 @@ public class TestColor extends JFrame {
 
         JCheckBox chPipettePicker = new JCheckBox("Pipette Picker Enabled", true);
         JCheckBox chAlpha = new JCheckBox("Alpha Enabled", true);
+        JCheckBox chPreview = new JCheckBox("Preview Enabled", true);
         chPipettePicker.addActionListener(e -> colorPicker.setColorPipettePickerEnabled(chPipettePicker.isSelected()));
         chAlpha.addActionListener(e -> colorPicker.setColorAlphaEnabled(chAlpha.isSelected()));
+        chPreview.addActionListener(e -> colorPicker.setColorPreviewEnabled(chPreview.isSelected()));
         panelOtherOption.add(chPipettePicker);
         panelOtherOption.add(chAlpha);
+        panelOtherOption.add(chPreview);
 
         panelOption.add(panelOtherOption);
 
