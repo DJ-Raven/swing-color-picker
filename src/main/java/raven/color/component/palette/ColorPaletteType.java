@@ -1,10 +1,6 @@
-package raven.color.component.piptte;
+package raven.color.component.palette;
 
 import raven.color.ColorPicker;
-import raven.color.component.palette.DefaultColorPaletteData;
-import raven.color.component.palette.DefaultColorPaletteItemPainter;
-import raven.color.component.palette.MaterialColorPaletteData;
-import raven.color.component.palette.TailwindColorPaletteData;
 
 public enum ColorPaletteType {
     DEFAULT, TAILWIND, MATERIAL;

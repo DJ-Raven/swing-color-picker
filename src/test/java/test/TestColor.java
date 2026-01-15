@@ -4,7 +4,7 @@ import com.formdev.flatlaf.*;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import raven.color.*;
-import raven.color.component.piptte.ColorPaletteType;
+import raven.color.component.palette.ColorPaletteType;
 import test.utils.LineLayout;
 
 import javax.swing.*;
@@ -166,14 +166,14 @@ public class TestColor extends JFrame {
         panelOtherOption.setBorder(new TitledBorder("Other Options"));
 
         JCheckBox chPipettePicker = new JCheckBox("Pipette Picker Enabled", true);
-        JCheckBox chAlpha = new JCheckBox("Alpha Enabled", true);
         JCheckBox chPreview = new JCheckBox("Preview Enabled", true);
+        JCheckBox chAlpha = new JCheckBox("Alpha Enabled", true);
         chPipettePicker.addActionListener(e -> colorPicker.setColorPipettePickerEnabled(chPipettePicker.isSelected()));
-        chAlpha.addActionListener(e -> colorPicker.setColorAlphaEnabled(chAlpha.isSelected()));
         chPreview.addActionListener(e -> colorPicker.setColorPreviewEnabled(chPreview.isSelected()));
+        chAlpha.addActionListener(e -> colorPicker.setColorAlphaEnabled(chAlpha.isSelected()));
         panelOtherOption.add(chPipettePicker);
-        panelOtherOption.add(chAlpha);
         panelOtherOption.add(chPreview);
+        panelOtherOption.add(chAlpha);
 
         panelOption.add(panelOtherOption);
 
