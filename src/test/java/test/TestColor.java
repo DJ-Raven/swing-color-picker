@@ -127,6 +127,7 @@ public class TestColor extends JFrame {
         JRadioButton jrDisk = new JRadioButton("Disk");
         JRadioButton jrCorelTriangle = new JRadioButton("Corel Triangle");
         JRadioButton jrCorelSquare = new JRadioButton("Corel Square");
+        JRadioButton jrCorelRhombus = new JRadioButton("Corel Rhombus");
         jrDino.addActionListener(e -> {
             if (jrDino.isSelected()) {
                 colorPicker.setModel(new DinoColorPickerModel());
@@ -148,16 +149,23 @@ public class TestColor extends JFrame {
                 colorPicker.setModel(new CorelSquareColorPickerModel());
             }
         });
+        jrCorelRhombus.addActionListener(e -> {
+            if (jrCorelRhombus.isSelected()) {
+                colorPicker.setModel(new CorelRhombusColorPickerModel());
+            }
+        });
 
         group.add(jrDino);
         group.add(jrDisk);
         group.add(jrCorelTriangle);
         group.add(jrCorelSquare);
+        group.add(jrCorelRhombus);
 
         panelModel.add(jrDino);
         panelModel.add(jrDisk);
         panelModel.add(jrCorelTriangle);
         panelModel.add(jrCorelSquare);
+        panelModel.add(jrCorelRhombus);
 
         panelOption.add(panelModel);
 

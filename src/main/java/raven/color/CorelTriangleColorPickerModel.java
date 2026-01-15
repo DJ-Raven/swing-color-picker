@@ -26,8 +26,8 @@ public class CorelTriangleColorPickerModel extends CorelSquareColorPickerModel {
     }
 
     @Override
-    protected boolean isRotate() {
-        return true;
+    protected float getSelectionRotate() {
+        return getValue() * 360 + 90;
     }
 
     @Override
@@ -43,7 +43,7 @@ public class CorelTriangleColorPickerModel extends CorelSquareColorPickerModel {
 
         x = cx + (x - cx) * k;
         y = cy + (y - cy) * k;
-        float angle = getValue() * 360 + 90;
+        float angle = getSelectionRotate();
 
         // undo rotation
         ColorLocation p = rotate(x, y, -angle);
@@ -78,7 +78,7 @@ public class CorelTriangleColorPickerModel extends CorelSquareColorPickerModel {
         float y = 0.0f * wPure + WHITE.y * wWhite + BLACK.y * wBlack;
 
         // rotate
-        float angle = getValue() * 360 + 90;
+        float angle = getSelectionRotate();
         ColorLocation p = rotate(x, y, angle);
 
         // apply padding
@@ -89,19 +89,6 @@ public class CorelTriangleColorPickerModel extends CorelSquareColorPickerModel {
         float nx = cx + (p.getX() - cx) * k;
         float ny = cy + (p.getY() - cy) * k;
         return new ColorLocation(nx, ny);
-    }
-
-    @Override
-    public ColorLocation getLocation() {
-        ColorLocation location = super.getLocation();
-        float angle = getValue() * 360;
-        return rotate(location.getX(), location.getY(), angle);
-    }
-
-    @Override
-    public void setLocation(ColorLocation location) {
-        float ag = getValue() * 360;
-        super.setLocation(rotate(location.getX(), location.getY(), -ag));
     }
 
     @Override
@@ -163,7 +150,7 @@ public class CorelTriangleColorPickerModel extends CorelSquareColorPickerModel {
 
     @Override
     protected ColorLocation clampLocation(ColorLocation loc) {
-        float angle = getValue() * 360 + 90;
+        float angle = getSelectionRotate();
 
         float cx = 0.5f;
         float cy = 0.5f;
@@ -228,18 +215,5 @@ public class CorelTriangleColorPickerModel extends CorelSquareColorPickerModel {
         float u = 1f - v - w;
 
         return new float[]{u, v, w};
-    }
-
-    protected ColorLocation rotate(float x, float y, float angle) {
-        float cx = 0.5f;
-        float cy = 0.5f;
-        double a = Math.toRadians(angle);
-        double cos = Math.cos(a);
-        double sin = Math.sin(a);
-        float dx = x - cx;
-        float dy = y - cy;
-        float rx = (float) (cx + dx * cos - dy * sin);
-        float ry = (float) (cy + dx * sin + dy * cos);
-        return new ColorLocation(rx, ry);
     }
 }

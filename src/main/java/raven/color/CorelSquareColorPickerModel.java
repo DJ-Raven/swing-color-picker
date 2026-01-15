@@ -34,8 +34,8 @@ public class CorelSquareColorPickerModel extends DiskColorPickerModel {
         return 0.14f;
     }
 
-    protected boolean isRotate() {
-        return false;
+    protected float getSelectionRotate() {
+        return 0;
     }
 
     @Override
@@ -59,6 +59,12 @@ public class CorelSquareColorPickerModel extends DiskColorPickerModel {
 
     @Override
     public Color locationToColor(ColorLocation location, float value) {
+        float rotate = getSelectionRotate();
+        if (rotate > 0) {
+            // undo rotation
+            location = rotate(location.getX(), location.getY(), -rotate);
+        }
+
         float padding = (wheelSize + getSpace()) * 2f;
         float usable = Math.max(0f, 1f - padding);
 
@@ -84,7 +90,34 @@ public class CorelSquareColorPickerModel extends DiskColorPickerModel {
         // invert mapping
         float x = halfPad + s * usable;
         float y = halfPad + (1f - v) * usable;
-        return new ColorLocation(clamp(x), clamp(y));
+        ColorLocation loc = new ColorLocation(clamp(x), clamp(y));
+
+        float rotate = getSelectionRotate();
+        if (rotate > 0) {
+            return rotate(loc.getX(), loc.getY(), rotate);
+        } else {
+            return loc;
+        }
+    }
+
+    @Override
+    public ColorLocation getLocation() {
+        float rotate = getSelectionRotate();
+        if (rotate > 0) {
+            ColorLocation location = super.getLocation();
+            return rotate(location.getX(), location.getY(), rotate);
+        }
+        return super.getLocation();
+    }
+
+    @Override
+    public void setLocation(ColorLocation location) {
+        float rotate = getSelectionRotate();
+        if (rotate > 0) {
+            super.setLocation(rotate(location.getX(), location.getY(), -rotate));
+        } else {
+            super.setLocation(location);
+        }
     }
 
     @Override
@@ -143,31 +176,25 @@ public class CorelSquareColorPickerModel extends DiskColorPickerModel {
 
             g2.drawImage(hueWheelImage, 0, 0, null);
 
-            // paint shape color
-            boolean rotate = isRotate();
+            // paint selection color
             float angle = getValue() * 360;
+            float selectionRotate = getSelectionRotate();
             int l = hueWheelBorderSize + spaceSize;
-            g2.translate(l, l);
             AffineTransform tran = g2.getTransform();
-
 
             float cx = selectionImage.getWidth() / 2f;
             float cy = selectionImage.getHeight() / 2f;
-            tran.rotate(Math.toRadians(angle + 90), cx, cy);
-            if (rotate) {
-                g2.setTransform(tran);
+            if (selectionRotate > 0) {
+                tran.rotate(Math.toRadians(selectionRotate), cx, cy);
             }
-
-            g2.drawImage(selectionImage, 0, 0, null);
+            g2.translate(l, l);
+            g2.drawImage(selectionImage, tran, null);
 
             // paint selected
-            if (!rotate) {
-                g2.setTransform(tran);
-            }
-            ColorLocation loc = angleToLocation(-90);
+            g2.rotate(Math.toRadians(angle), cx, cy);
             float s = size / 2f;
-            float lx = loc.getX() * (s - hueWheelBorderSize / 2f);
-            float ly = loc.getY() * (s - hueWheelBorderSize / 2f);
+            float lx = (s - hueWheelBorderSize / 2f);
+            float ly = 0;
             double tranX = s + lx - (hueWheelBorderSize / 2f);
             double tranY = s + ly - (hueWheelBorderSize / 2f);
             g2.translate(tranX - l, tranY - l);
@@ -223,13 +250,6 @@ public class CorelSquareColorPickerModel extends DiskColorPickerModel {
         return (360f - angle) % 360f;
     }
 
-    protected ColorLocation angleToLocation(float angle) {
-        float rad = (float) Math.toRadians(angle);
-        float x = (float) (Math.cos(rad));
-        float y = (float) (Math.sin(rad));
-        return new ColorLocation(x, y);
-    }
-
     protected boolean isWheelPressed(ColorLocation loc) {
         if (wheelPressed.getX() == loc.getX() && wheelPressed.getY() == loc.getY()) {
             return isWheelPressed;
@@ -258,6 +278,12 @@ public class CorelSquareColorPickerModel extends DiskColorPickerModel {
     }
 
     protected ColorLocation clampLocation(ColorLocation loc) {
+        float rotate = getSelectionRotate();
+        if (rotate > 0) {
+            // undo rotation
+            loc = rotate(loc.getX(), loc.getY(), -rotate);
+        }
+
         float nx = loc.getX() * 2f - 1f;
         float ny = loc.getY() * 2f - 1f;
 
@@ -271,6 +297,22 @@ public class CorelSquareColorPickerModel extends DiskColorPickerModel {
 
         loc.set((nx + 1f) * 0.5f, (ny + 1f) * 0.5f);
 
+        if (rotate > 0) {
+            return rotate(loc.getX(), loc.getY(), rotate);
+        }
         return loc;
+    }
+
+    protected ColorLocation rotate(float x, float y, float angle) {
+        float cx = 0.5f;
+        float cy = 0.5f;
+        double a = Math.toRadians(angle);
+        double cos = Math.cos(a);
+        double sin = Math.sin(a);
+        float dx = x - cx;
+        float dy = y - cy;
+        float rx = (float) (cx + dx * cos - dy * sin);
+        float ry = (float) (cy + dx * sin + dy * cos);
+        return new ColorLocation(rx, ry);
     }
 }
