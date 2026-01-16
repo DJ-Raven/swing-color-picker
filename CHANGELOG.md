@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.0.0-SNAPSHOT]
+
+### New features and improvements
+
+- Refactor some code
+- Added 3 new color model:
+    - `CorelSquareColorPickerModel`
+    - `CorelTriangleColorPickerModel`
+    - `CorelRhombusColorPickerModel`
+- Added 2 new option:
+    - `colorAlphaEnabled` by default `true`
+    - `colorPreviewEnabled` by default `true`
+
+### Changed
+
+- Removed migLayout and replaced it with a custom layout implementation to reduce external dependencies.
+
 ## [1.1.0] - 2025-12-27
 
 ### New features and improvements
