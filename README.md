@@ -69,4 +69,3 @@ if (color != null) {
 ## Library Resources
 
 - [FlatLaf](https://github.com/JFormDesigner/FlatLaf) - FlatLaf library for the modern UI design theme
-- [MigLayout](https://github.com/mikaelgrev/miglayout) - MigLayout library for flexible layout management
