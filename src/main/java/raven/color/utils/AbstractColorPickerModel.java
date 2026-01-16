@@ -1,5 +1,6 @@
-package raven.color.component;
+package raven.color.utils;
 
+import raven.color.component.LocationChangeEvent;
 import raven.color.event.ColorChangeEvent;
 import raven.color.event.ColorChangedListener;
 
@@ -16,8 +17,8 @@ public abstract class AbstractColorPickerModel implements ColorPickerModel {
     protected BufferedImage colorImage;
     protected Color selectedColor;
 
-    protected final ColorLocation location = new ColorLocation(0f, 0f);
-    protected float value = 1f;
+    private final ColorLocation location = new ColorLocation(0f, 0f);
+    private float value = 1f;
 
     protected float oldValue = -1f;
 
@@ -47,7 +48,7 @@ public abstract class AbstractColorPickerModel implements ColorPickerModel {
             boolean valueChanged = false;
             if (valueChange) {
                 this.value = colorToValue(selectedColor);
-                this.location.set(colorToLocation(selectedColor));
+                setLocation(colorToLocation(selectedColor));
             } else {
                 // check is only alpha changed
                 if (isAlphaChangedOnly(this.selectedColor, selectedColor)) {
@@ -64,7 +65,15 @@ public abstract class AbstractColorPickerModel implements ColorPickerModel {
     }
 
     @Override
-    public void locationValue(ColorLocation location) {
+    public void locationValue(ColorLocation location, LocationChangeEvent event) {
+        this.location.set(location);
+    }
+
+    public ColorLocation getLocation() {
+        return location;
+    }
+
+    public void setLocation(ColorLocation location) {
         this.location.set(location);
     }
 
@@ -78,9 +87,9 @@ public abstract class AbstractColorPickerModel implements ColorPickerModel {
         value = clamp(value);
         if (this.value != value) {
             this.value = value;
-            if (selectedColor != null) {
+            Color oldColor = getSelectedColor();
+            if (oldColor != null) {
                 Color color = valueToColor(location, value);
-                Color oldColor = selectedColor;
                 int alpha = oldColor.getAlpha();
                 selectedColor = color;
                 if (alpha != 255) {
@@ -94,6 +103,16 @@ public abstract class AbstractColorPickerModel implements ColorPickerModel {
     @Override
     public ColorDimension getDimensionImage(int width, int height) {
         return new ColorDimension(width, height);
+    }
+
+    @Override
+    public boolean notifySelectedLocationOnValueChanged() {
+        return false;
+    }
+
+    @Override
+    public boolean showValueComponent() {
+        return true;
     }
 
     @Override
@@ -115,7 +134,7 @@ public abstract class AbstractColorPickerModel implements ColorPickerModel {
         }
     }
 
-    private boolean isAlphaChangedOnly(Color color1, Color color2) {
+    protected boolean isAlphaChangedOnly(Color color1, Color color2) {
         if (color1 == null || color2 == null) {
             return false;
         }
@@ -143,7 +162,11 @@ public abstract class AbstractColorPickerModel implements ColorPickerModel {
         return arc;
     }
 
-    private float clamp(float value) {
+    protected float clamp(float value) {
         return Math.max(0f, Math.min(1f, value));
+    }
+
+    protected float scale(float v) {
+        return ColorPickerUtils.scale(v);
     }
 }

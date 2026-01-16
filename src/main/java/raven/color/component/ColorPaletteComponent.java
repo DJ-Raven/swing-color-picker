@@ -2,8 +2,9 @@ package raven.color.component;
 
 import com.formdev.flatlaf.util.ScaledEmptyBorder;
 import com.formdev.flatlaf.util.UIScale;
-import raven.color.component.utils.ColorPaletteData;
-import raven.color.component.utils.ColorPaletteItemPainter;
+import raven.color.component.palette.ColorPaletteData;
+import raven.color.component.palette.ColorPaletteItemPainter;
+import raven.color.utils.ColorPickerUtils;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -14,7 +15,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ColorPaletteComponent extends JComponent {
+public class ColorPaletteComponent extends ColorElement {
 
     private final List<Item> items = new ArrayList<>();
     private ColorPaletteData colorData;
@@ -30,7 +31,7 @@ public class ColorPaletteComponent extends JComponent {
     }
 
     private void init() {
-        setBorder(new ScaledEmptyBorder(10, 10, 5, 10));
+        setBorder(new ScaledEmptyBorder(6, 10, 6, 10));
         MouseAdapter mouseListener = new MouseAdapter() {
 
             @Override
@@ -128,7 +129,7 @@ public class ColorPaletteComponent extends JComponent {
 
     private void repaintAt(int index) {
         if (index >= 0 && index < items.size()) {
-            int border = UIScale.scale(itemPainter.getItemBorderSize());
+            int border = scale(itemPainter.getItemBorderSize());
             Rectangle itemRec = items.get(index).getSize();
             int x = itemRec.x - border;
             int y = itemRec.y - border;
@@ -176,8 +177,8 @@ public class ColorPaletteComponent extends JComponent {
         int x = insets.left;
         int y = insets.top;
         int width = getWidth() - (insets.left + insets.right);
-        int gap = UIScale.scale(itemPainter.getItemGap());
-        Dimension itemSize = UIScale.scale(itemPainter.getItemSize());
+        int gap = scale(itemPainter.getItemGap());
+        Dimension itemSize = ColorPickerUtils.scale(itemPainter.getItemSize());
         int itemCount = colorData.size();
         int column = (width + gap) / (itemSize.width + gap);
 
@@ -200,9 +201,9 @@ public class ColorPaletteComponent extends JComponent {
     @Override
     public Dimension getPreferredSize() {
         int maxRow = itemPainter.getMaxRow();
-        int gap = UIScale.scale(itemPainter.getItemGap());
+        int gap = scale(itemPainter.getItemGap());
         Insets insets = getInsets();
-        Dimension itemSize = UIScale.scale(itemPainter.getItemSize());
+        Dimension itemSize = ColorPickerUtils.scale(itemPainter.getItemSize());
         int height = (maxRow * itemSize.height) + ((maxRow - 1) * gap) + (insets.top + insets.bottom);
         return new Dimension(50, height);
     }
@@ -264,5 +265,9 @@ public class ColorPaletteComponent extends JComponent {
         public boolean isHasFocus() {
             return hoverIndex == index;
         }
+    }
+
+    public int scale(int v) {
+        return UIScale.scale(v);
     }
 }

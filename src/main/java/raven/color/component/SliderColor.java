@@ -3,8 +3,8 @@ package raven.color.component;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.util.ColorFunctions;
 import com.formdev.flatlaf.util.HiDPIUtils;
-import com.formdev.flatlaf.util.UIScale;
-import raven.color.ColorPickerUtils;
+import raven.color.utils.ColorLocation;
+import raven.color.utils.ColorPickerUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,9 +12,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 
-public abstract class SliderColor extends JComponent {
+public abstract class SliderColor extends ColorElement {
 
-    private final int selectedSize;
+    private final LocationChangeEvent event = new LocationChangeEvent(this);
+    private int selectedSize;
+    private Insets sliderInsets = new Insets(4, 10, 4, 10);
     private MouseAdapter mouseListener;
 
     public SliderColor() {
@@ -30,14 +32,14 @@ public abstract class SliderColor extends JComponent {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    mouseChange(e.getPoint());
+                    mouseChange(e.getPoint(), true);
                 }
             }
 
             @Override
             public void mouseDragged(MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    mouseChange(e.getPoint());
+                    mouseChange(e.getPoint(), false);
                 }
             }
         };
@@ -53,7 +55,7 @@ public abstract class SliderColor extends JComponent {
         }
     }
 
-    private void mouseChange(Point point) {
+    private void mouseChange(Point point, boolean isPressed) {
         Rectangle rec = getSlideRectangle();
         int px = point.x - rec.x;
         int py = point.y - rec.y;
@@ -61,7 +63,30 @@ public abstract class SliderColor extends JComponent {
         float vy = ((float) py) / (float) rec.height;
         vx = Math.max(0f, Math.min(1f, vx));
         vy = Math.max(0f, Math.min(1f, vy));
-        valueChanged(new ColorLocation(vx, vy));
+        ColorLocation loc = new ColorLocation(vx, vy);
+        event.reset();
+        if (isPressed) {
+            event.setPressedLocation(loc);
+        }
+        valueChanged(loc, event);
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        if (isMinimumSizeSet()) {
+            return super.getMinimumSize();
+        }
+        int size = ColorPickerUtils.scale(selectedSize);
+        return new Dimension(size, size);
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        if (isPreferredSizeSet()) {
+            return super.getPreferredSize();
+        }
+        int size = ColorPickerUtils.scale(selectedSize);
+        return new Dimension(size, size);
     }
 
     @Override
@@ -70,27 +95,36 @@ public abstract class SliderColor extends JComponent {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        HiDPIUtils.paintAtScale1x(g2, rec.x, rec.y, rec.width, rec.height, this::paint);
+        if (rec.width > 0 && rec.height > 0) {
+            paintSliderColor(g2, rec.x, rec.y, rec.width, rec.height);
+        }
 
-        int size = UIScale.scale(selectedSize);
-        ColorLocation value = getValue();
-        int selectionX = (int) (rec.x + rec.width * value.getX());
-        int selectionY = (int) (rec.y + rec.height * value.getY());
+        if (selectedSize > 0) {
+            int size = ColorPickerUtils.scale(selectedSize);
+            ColorLocation value = getValue();
+            if (value != null) {
+                int selectionX = (int) (rec.x + rec.width * value.getX());
+                int selectionY = (int) (rec.y + rec.height * value.getY());
 
-        paintSelection(g2, selectionX, selectionY, size);
-
+                paintSelection(g2, selectionX, selectionY, size);
+            }
+        }
         g2.dispose();
         super.paintComponent(g);
     }
 
-    protected abstract void valueChanged(ColorLocation value);
+    protected void paintSliderColor(Graphics2D g2, int x, int y, int width, int height) {
+        HiDPIUtils.paintAtScale1x(g2, x, y, width, height, this::paint);
+    }
+
+    protected abstract void valueChanged(ColorLocation value, LocationChangeEvent event);
 
     protected abstract ColorLocation getValue();
 
     protected abstract void paint(Graphics2D g, int x, int y, int width, int height, double scaleFactor);
 
     protected Rectangle getSlideRectangle() {
-        Insets insets = getInsets();
+        Insets insets = ColorPickerUtils.scale(getSliderInsets());
         int x = insets.left;
         int y = insets.top;
         int width = getWidth() - (insets.left + insets.right);
@@ -99,13 +133,15 @@ public abstract class SliderColor extends JComponent {
     }
 
     protected void paintSelection(Graphics2D g2, int x, int y, int size) {
-        g2.translate(x - size / 2f, y - size / 2f);
+        double tranX = x - size / 2f;
+        double tranY = y - size / 2f;
+        g2.translate(tranX, tranY);
 
         g2.setColor(UIManager.getColor("Component.borderColor"));
         g2.fill(ColorPickerUtils.createShape(size, 0.6f, 0f));
 
         g2.setColor(getTrackColor());
-        g2.fill(ColorPickerUtils.createShape(size, 0.6f, UIScale.scale(1f)));
+        g2.fill(ColorPickerUtils.createShape(size, 0.6f, ColorPickerUtils.scale(1f)));
 
         Color selectedColor = getSelectedColor();
         if (selectedColor != null) {
@@ -114,10 +150,11 @@ public abstract class SliderColor extends JComponent {
             g2.setColor(selectedColor);
             g2.fill(new Ellipse2D.Double(sx, sx, s, s));
         }
+        g2.translate(-tranX, -tranY);
     }
 
     protected int scale(int value, double scaleFactor) {
-        return (int) Math.ceil(UIScale.scale(value) * scaleFactor);
+        return (int) Math.ceil(ColorPickerUtils.scale(value) * scaleFactor);
     }
 
     protected Color getTrackColor() {
@@ -129,5 +166,25 @@ public abstract class SliderColor extends JComponent {
 
     protected Color getSelectedColor() {
         return null;
+    }
+
+    public int getSelectedSize() {
+        return selectedSize;
+    }
+
+    public void setSelectedSize(int selectedSize) {
+        if (this.selectedSize != selectedSize) {
+            this.selectedSize = selectedSize;
+            repaint();
+        }
+    }
+
+    public Insets getSliderInsets() {
+        return sliderInsets;
+    }
+
+    public void setSliderInsets(Insets sliderInsets) {
+        this.sliderInsets = sliderInsets;
+        repaint();
     }
 }

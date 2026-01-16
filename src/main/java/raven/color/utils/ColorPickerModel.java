@@ -1,5 +1,6 @@
-package raven.color.component;
+package raven.color.utils;
 
+import raven.color.component.LocationChangeEvent;
 import raven.color.event.ColorChangedListener;
 
 import java.awt.*;
@@ -22,11 +23,15 @@ public interface ColorPickerModel {
 
     void setValue(float value);
 
-    void locationValue(ColorLocation location);
+    void locationValue(ColorLocation location, LocationChangeEvent event);
 
     Color locationToColor(ColorLocation location, float value);
 
     ColorLocation colorToLocation(Color color);
+
+    boolean notifySelectedLocationOnValueChanged();
+
+    boolean showValueComponent();
 
     void addChangeListener(ColorChangedListener listener);
 

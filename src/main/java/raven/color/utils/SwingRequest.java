@@ -1,4 +1,4 @@
-package raven.color.component;
+package raven.color.utils;
 
 import javax.swing.*;
 

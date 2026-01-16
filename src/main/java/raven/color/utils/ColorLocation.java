@@ -1,4 +1,4 @@
-package raven.color.component;
+package raven.color.utils;
 
 public class ColorLocation {
 
@@ -15,6 +15,14 @@ public class ColorLocation {
         this.y = y;
     }
 
+    public ColorLocation(ColorLocation value) {
+        this.x = value.getX();
+        this.y = value.getY();
+    }
+
+    public ColorLocation() {
+    }
+
     private float x;
     private float y;
 
@@ -26,5 +34,13 @@ public class ColorLocation {
     public void set(float x, float y) {
         this.x = x;
         this.y = y;
+    }
+
+    @Override
+    public String toString() {
+        return "ColorLocation{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
     }
 }

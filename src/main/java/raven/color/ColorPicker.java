@@ -3,14 +3,18 @@ package raven.color;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
-import net.miginfocom.swing.MigLayout;
 import raven.color.component.*;
+import raven.color.component.palette.ColorPaletteType;
+import raven.color.component.palette.DefaultColorPaletteData;
+import raven.color.component.palette.DefaultColorPaletteItemPainter;
 import raven.color.component.piptte.ColorPipette;
 import raven.color.component.piptte.DefaultColorPipette;
-import raven.color.component.utils.DefaultColorPaletteData;
-import raven.color.component.utils.DefaultColorPaletteItemPainter;
 import raven.color.event.ColorChangeEvent;
 import raven.color.event.ColorChangedListener;
+import raven.color.utils.ColorPickerLayout;
+import raven.color.utils.ColorPickerModel;
+import raven.color.utils.DefaultColorPickerLayout;
+import raven.color.utils.OtherComponentLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,62 +26,60 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     private ColorValueComponent colorValueComponent;
     private ColorAlphaComponent colorAlphaComponent;
 
-    private JPanel leftPanel;
+    private ColorElement colorOtherComponent;
     private ColorPreview colorPreview;
     private ColorField colorField;
     private ColorPaletteComponent colorPalette;
     private ColorPipette colorPipette;
+    private ColorPickerLayout colorPickerLayout;
 
     private boolean colorPaletteEnabled = true;
     private boolean colorPipettePickerEnabled = true;
+    private boolean colorAlphaEnabled = true;
+    private boolean colorPreviewEnabled = true;
 
     public ColorPicker() {
         this(new DinoColorPickerModel());
     }
 
     public ColorPicker(Color initialColor) {
-        init(new DinoColorPickerModel(), initialColor);
+        this(new DinoColorPickerModel(initialColor));
     }
 
     public ColorPicker(ColorPickerModel model) {
-        init(model, model.getSelectedColor());
+        super(new DefaultColorPickerLayout());
+        init(model);
     }
 
-    private void init(ColorPickerModel model, Color initialColor) {
-        setLayout(new MigLayout("wrap,fillx,gap 0,insets 0 0 5 0", "[fill,280]"));
+    private void init(ColorPickerModel model) {
+        colorComponent = new ColorComponent(model, false);
+        colorValueComponent = new ColorValueComponent(model, false);
+        colorAlphaComponent = new ColorAlphaComponent(model, false);
+        colorField = new ColorField(model);
 
-        colorComponent = new ColorComponent(this);
-        colorValueComponent = new ColorValueComponent(this);
-        colorAlphaComponent = new ColorAlphaComponent(this);
-        colorField = new ColorField(this);
-
-        JPanel panel = new JPanel(new MigLayout("wrap 2,fillx,insets 0,gap 3", "7[grow 0,fill][fill]"));
-
-        panel.setOpaque(false);
-        add(colorComponent, "height 50:180:");
-        panel.add(createLeftComponent(), "span 1 2");
-        panel.add(colorValueComponent, "height 20!");
-        panel.add(colorAlphaComponent, "height 20!");
-        add(panel);
-
+        add(colorComponent);
+        add(createOtherComponent());
+        add(colorValueComponent);
+        add(colorAlphaComponent);
         add(colorField);
+
         if (isColorPaletteEnabled()) {
             add(createColorPalette());
         }
         if (isColorPipettePickerEnabled()) {
             installColorPipettePicker();
         }
-        model.setSelectedColor(initialColor);
-
         setModel(model);
+        installLayoutComponent();
     }
 
-    private Component createLeftComponent() {
-        leftPanel = new JPanel(new MigLayout("insets 3"));
-        leftPanel.setOpaque(false);
+    private Component createOtherComponent() {
+        colorOtherComponent = new ColorElement(new OtherComponentLayout());
         colorPreview = new ColorPreview();
-        leftPanel.add(colorPreview, "width 33,height 33");
-        return leftPanel;
+        if (isColorPreviewEnabled()) {
+            colorOtherComponent.add(colorPreview);
+        }
+        return colorOtherComponent;
     }
 
     private void installColorPipettePicker() {
@@ -88,10 +90,8 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
                 pipette.setInitialColor(getSelectedColor());
                 pipette.show();
             });
-            cmdPipette.putClientProperty(FlatClientProperties.STYLE, "" +
-                    "border:2,2,2,2,$Component.borderColor,1,10;" +
-                    "background:null;");
-            leftPanel.add(cmdPipette, "width 33,height 33", 0);
+            cmdPipette.putClientProperty(FlatClientProperties.STYLE, "border:2,2,2,2,$Component.borderColor,1,10;background:null;");
+            colorOtherComponent.add(cmdPipette, 0);
             colorPipette = pipette;
             repaint();
             revalidate();
@@ -100,7 +100,7 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
 
     private void uninstallColorPipettePicker() {
         if (colorPipette != null) {
-            leftPanel.remove(0);
+            colorOtherComponent.remove(0);
             colorPipette.dispose();
             colorPipette = null;
             repaint();
@@ -123,12 +123,24 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
 
     private void updateColorComponent() {
         if (colorField != null) {
-            colorField.colorChanged(model.getSelectedColor());
+            colorField.setModel(model);
         }
         if (colorPreview != null) {
             colorPreview.setColor(model.getSelectedColor());
         }
-        colorComponent.changeSelectedPoint(model.getSelectedColor());
+        colorComponent.setModel(model);
+        colorValueComponent.setModel(model);
+        colorAlphaComponent.setModel(model);
+
+        if (model.showValueComponent()) {
+            add(colorValueComponent);
+            getColorPickerLayout().setColorValue(colorValueComponent);
+        } else {
+            remove(colorValueComponent);
+            getColorPickerLayout().setColorValue(null);
+        }
+        repaint();
+        revalidate();
     }
 
     private ColorPipette createColorPipette() {
@@ -153,12 +165,12 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
             ColorPickerModel old = this.model;
             if (old != null) {
                 old.removeChangeListener(this);
+                model.setSelectedColor(old.getSelectedColor());
             }
             this.model = model;
             this.model.addChangeListener(this);
 
             updateColorComponent();
-            repaint();
         }
     }
 
@@ -180,10 +192,14 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
             if (!enabled) {
                 if (colorPalette != null) {
                     remove(colorPalette);
+                    getColorPickerLayout().setColorPalette(null);
+                    repaint();
                     revalidate();
                 }
             } else {
                 add(createColorPalette());
+                getColorPickerLayout().setColorPalette(colorPalette);
+                repaint();
                 revalidate();
             }
         }
@@ -201,11 +217,82 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
             } else {
                 uninstallColorPipettePicker();
             }
+            updateColorOtherComponentLayout();
+        }
+    }
+
+    public boolean isColorAlphaEnabled() {
+        return colorAlphaEnabled;
+    }
+
+    public void setColorAlphaEnabled(boolean colorAlphaEnabled) {
+        if (this.colorAlphaEnabled != colorAlphaEnabled) {
+            this.colorAlphaEnabled = colorAlphaEnabled;
+            if (colorField != null) {
+                if (colorAlphaEnabled) {
+                    add(colorAlphaComponent);
+                    getColorPickerLayout().setColorAlpha(colorAlphaComponent);
+                } else {
+                    Color color = model.getSelectedColor();
+                    if (color.getAlpha() < 255) {
+                        model.setSelectedColor(new Color(color.getRGB()));
+                    }
+                    remove(colorAlphaComponent);
+                    getColorPickerLayout().setColorAlpha(null);
+                }
+                colorField.setColorAlphaEnabled(colorAlphaEnabled);
+                repaint();
+                revalidate();
+            }
+        }
+    }
+
+    public boolean isColorPreviewEnabled() {
+        return colorPreviewEnabled;
+    }
+
+    public void setColorPreviewEnabled(boolean colorPreviewEnabled) {
+        if (this.colorPreviewEnabled != colorPreviewEnabled) {
+            this.colorPreviewEnabled = colorPreviewEnabled;
+            if (colorPreviewEnabled) {
+                colorOtherComponent.add(colorPreview, colorOtherComponent.getComponentCount());
+            } else {
+                colorOtherComponent.remove(colorPreview);
+            }
+            updateColorOtherComponentLayout();
         }
     }
 
     public ColorPaletteComponent getColorPalette() {
         return colorPalette;
+    }
+
+    public ColorPickerLayout getColorPickerLayout() {
+        return colorPickerLayout;
+    }
+
+    public void setColorPickerLayout(ColorPickerLayout colorPickerLayout) {
+        if (colorPickerLayout == null) {
+            throw new IllegalArgumentException("color layout can't be null");
+        }
+        if (this.colorPickerLayout != colorPickerLayout) {
+            if (this.colorPickerLayout != null) {
+                uninstallLayoutComponent();
+            }
+            this.colorPickerLayout = colorPickerLayout;
+            installLayoutComponent();
+            super.setLayout(this.colorPickerLayout);
+            repaint();
+            revalidate();
+        }
+    }
+
+    @Override
+    public void setLayout(LayoutManager layout) {
+        if (!(layout instanceof ColorPickerLayout)) {
+            throw new ClassCastException("layout of ColorPicker must be a ColorPickerLayout");
+        }
+        setColorPickerLayout((ColorPickerLayout) layout);
     }
 
     public void applyColorPaletteType(ColorPaletteType type) {
@@ -241,20 +328,13 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
     @Override
     public void colorChanged(Color color, ColorChangeEvent event) {
         if (colorComponent != null) {
-            if (colorComponent.isNotifyRepaint()) {
-                if (!event.isValueChanged()) {
-                    // selected color invoked
-                    // so coverts color to selected point
-                    colorComponent.changeSelectedPoint(color);
-                }
-                colorComponent.repaint();
-            }
+            colorComponent.notifyColorChanged(color, event);
         }
         if (colorValueComponent != null) {
-            colorValueComponent.repaint();
+            colorValueComponent.notifyColorChanged(color, event);
         }
         if (colorAlphaComponent != null) {
-            colorAlphaComponent.repaint();
+            colorAlphaComponent.notifyColorChanged(color, event);
         }
         if (colorPreview != null) {
             colorPreview.setColor(color);
@@ -272,5 +352,46 @@ public class ColorPicker extends JPanel implements ColorChangedListener {
                 ((ColorChangedListener) listeners[i + 1]).colorChanged(getSelectedColor(), event);
             }
         }
+    }
+
+    private void installLayoutComponent() {
+        colorPickerLayout.setColorElement(colorComponent, getColorComponentForLayout(), getColorAlphaComponentForLayout(), getColorOtherComponentForLayout(), colorField, colorPalette);
+    }
+
+    private void uninstallLayoutComponent() {
+        colorPickerLayout.setColorElement(null, null, null, null, null, null);
+    }
+
+    private void updateColorOtherComponentLayout() {
+        if (colorPipette != null || isColorPreviewEnabled()) {
+            add(colorOtherComponent);
+            getColorPickerLayout().setColorOtherComponent(colorOtherComponent);
+        } else {
+            remove(colorOtherComponent);
+            getColorPickerLayout().setColorOtherComponent(null);
+        }
+        repaint();
+        revalidate();
+    }
+
+    private ColorElement getColorComponentForLayout() {
+        if (getModel() == null || getModel().showValueComponent()) {
+            return colorValueComponent;
+        }
+        return null;
+    }
+
+    private ColorElement getColorAlphaComponentForLayout() {
+        if (isColorAlphaEnabled()) {
+            return colorAlphaComponent;
+        }
+        return null;
+    }
+
+    private ColorElement getColorOtherComponentForLayout() {
+        if (colorPipette != null || isColorPreviewEnabled()) {
+            return colorOtherComponent;
+        }
+        return null;
     }
 }

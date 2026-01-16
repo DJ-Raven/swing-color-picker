@@ -1,6 +1,6 @@
 package raven.color.component.piptte;
 
-import raven.color.component.SwingRequest;
+import raven.color.utils.SwingRequest;
 import raven.color.event.ColorChangeEvent;
 import raven.color.event.ColorChangedListener;
 
