@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.0.0-SNAPSHOT]
+## [2.0.0] - 2026-01-17
 
 ### New features and improvements
 
