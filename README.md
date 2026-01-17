@@ -1,6 +1,7 @@
 # Swing Color Picker
 
-A Java Swing color picker built with FlatLaf and MigLayout.
+A Java Swing color picker built on FlatLaf, designed to work with built-in and customizable picker models, a color
+palette, and configurable UI elements.
 
 <img src="screenshot/screenshot.jpg" alt="color-picker" width="600"/>&nbsp;
 
@@ -65,6 +66,26 @@ if (color != null) {
     // color selected
 }
 ```
+
+#### Change Model
+
+``` java
+// create color picker object with an initial model
+ColorPicker colorPicker = new ColorPicker(new DiskColorPickerModel());
+
+// change to a different color picker model
+colorPicker.setModel(new CorelTriangleColorPickerModel());
+```
+
+### Available Model
+
+| Model Name                      | Description                                   |
+|---------------------------------|-----------------------------------------------|
+| `DinoColorPickerModel`          | Default HSV color model                       |
+| `DiskColorPickerModel`          | Circular color wheel                          |
+| `CorelSquareColorPickerModel`   | Square color selector with circular hue wheel |
+| `CorelTriangleColorPickerModel` | Triangle selector with circular hue wheel     |
+| `CorelRhombusColorPickerModel`  | Rhombus  selector with circular hue wheel     |
 
 ## Library Resources
 
