@@ -90,6 +90,15 @@ colorPicker.setModel(new CorelTriangleColorPickerModel());
 | `HexagonColorPickerModel`       | Honeycomb of hexagon cells with a gray row    |
 | `ImageColorPickerModel`         | Pick color from an image                      |
 
+## Documentation
+
+See the [documentation](docs/README.md) for more details
+
+- [Getting Started](docs/getting-started.md)
+- [Color Picker Options](docs/color-picker-options.md)
+- [Color Models](docs/color-models.md)
+- [Custom Model](docs/custom-model.md)
+
 ## Library Resources
 
 - [FlatLaf](https://github.com/JFormDesigner/FlatLaf) - FlatLaf library for the modern UI design theme
