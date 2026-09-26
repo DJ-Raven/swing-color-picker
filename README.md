@@ -88,6 +88,7 @@ colorPicker.setModel(new CorelTriangleColorPickerModel());
 | `CorelRhombusColorPickerModel`  | Rhombus  selector with circular hue wheel     |
 | `CorelCircleColorPickerModel`   | Circle   selector with circular hue wheel     |
 | `HexagonColorPickerModel`       | Honeycomb of hexagon cells with a gray row    |
+| `ImageColorPickerModel`         | Pick color from an image                      |
 
 ## Library Resources
 
