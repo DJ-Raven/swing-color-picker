@@ -20,7 +20,7 @@ public class TestColor extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(new Dimension(800, 800));
         setLocationRelativeTo(null);
-        setLayout(new LineLayout(LineLayout.HORIZONTAL, false, LineLayout.CENTER));
+        setLayout(new LineLayout(LineLayout.VERTICAL));
         colorPicker = new ColorPicker();
         colorPicker.putClientProperty(FlatClientProperties.STYLE, "" +
                 "border:10,10,10,10,$Component.borderColor,1,15;" +
@@ -128,6 +128,7 @@ public class TestColor extends JFrame {
         JRadioButton jrCorelTriangle = new JRadioButton("Corel Triangle");
         JRadioButton jrCorelSquare = new JRadioButton("Corel Square");
         JRadioButton jrCorelRhombus = new JRadioButton("Corel Rhombus");
+        JRadioButton jrCorelCircle = new JRadioButton("Corel Circle");
         jrDino.addActionListener(e -> {
             if (jrDino.isSelected()) {
                 colorPicker.setModel(new DinoColorPickerModel());
@@ -154,18 +155,25 @@ public class TestColor extends JFrame {
                 colorPicker.setModel(new CorelRhombusColorPickerModel());
             }
         });
+        jrCorelCircle.addActionListener(e -> {
+            if (jrCorelCircle.isSelected()) {
+                colorPicker.setModel(new CorelCircleColorPickerModel());
+            }
+        });
 
         group.add(jrDino);
         group.add(jrDisk);
         group.add(jrCorelTriangle);
         group.add(jrCorelSquare);
         group.add(jrCorelRhombus);
+        group.add(jrCorelCircle);
 
         panelModel.add(jrDino);
         panelModel.add(jrDisk);
         panelModel.add(jrCorelTriangle);
         panelModel.add(jrCorelSquare);
         panelModel.add(jrCorelRhombus);
+        panelModel.add(jrCorelCircle);
 
         panelOption.add(panelModel);
 

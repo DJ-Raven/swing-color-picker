@@ -86,6 +86,7 @@ colorPicker.setModel(new CorelTriangleColorPickerModel());
 | `CorelSquareColorPickerModel`   | Square color selector with circular hue wheel |
 | `CorelTriangleColorPickerModel` | Triangle selector with circular hue wheel     |
 | `CorelRhombusColorPickerModel`  | Rhombus  selector with circular hue wheel     |
+| `CorelCircleColorPickerModel`   | Circle   selector with circular hue wheel     |
 
 ## Library Resources
 
