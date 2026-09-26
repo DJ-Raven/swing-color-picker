@@ -1,19 +1,19 @@
 package raven.color;
 
 import raven.color.component.LocationChangeEvent;
-import raven.color.event.ColorChangeEvent;
 import raven.color.utils.AbstractColorPickerModel;
 import raven.color.utils.ColorDimension;
 import raven.color.utils.ColorLocation;
 
 import java.awt.*;
 import java.awt.geom.Path2D;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
 /**
  * Honeycomb color picker: a large hexagon made of small hexagon cells, with an optional gray row below.
  * White at the center, hue by angle and lightness decreasing toward the outer ring.
- * Selection always snaps to the nearest cell.
+ * Selection always snaps to the nearest cell, the value component changes the brightness of all cells.
  */
 public class HexagonColorPickerModel extends AbstractColorPickerModel {
 
@@ -34,6 +34,7 @@ public class HexagonColorPickerModel extends AbstractColorPickerModel {
     protected static final float CELL_RADIUS = 1f / Math.max((RINGS * 2 + 1) * SQRT3, RINGS * 3 + 4 + GRAY_GAP);
 
     private boolean grayRowEnabled;
+    private Color oldSelectedColor;
     protected Cell[] cells;
 
     public HexagonColorPickerModel() {
@@ -59,15 +60,17 @@ public class HexagonColorPickerModel extends AbstractColorPickerModel {
             this.grayRowEnabled = grayRowEnabled;
             cells = createCells();
             colorImage = null;
-            setLocation(colorToLocation(getSelectedColor()));
-            // selected color not changed, notify to update the selected location and repaint
-            fireColorChanged(new ColorChangeEvent(this, false));
+            // reselect the same color to update the selected cell, value and repaint
+            Color color = getSelectedColor();
+            selectedColor = null;
+            setSelectedColor(color);
         }
     }
 
     @Override
     public Image getValueImage(int width, int height, int arc) {
-        return null;
+        createValueImage(width, height, arc);
+        return valueImage;
     }
 
     @Override
@@ -95,25 +98,13 @@ public class HexagonColorPickerModel extends AbstractColorPickerModel {
 
     @Override
     public Color locationToColor(ColorLocation location, float value) {
-        return locationToCell(location.getX(), location.getY()).color;
+        return cellColor(locationToCell(location.getX(), location.getY()), value);
     }
 
     @Override
     public ColorLocation colorToLocation(Color color) {
-        // nearest cell by color
-        Cell nearest = cells[0];
-        int min = Integer.MAX_VALUE;
-        for (Cell cell : cells) {
-            int dr = cell.color.getRed() - color.getRed();
-            int dg = cell.color.getGreen() - color.getGreen();
-            int db = cell.color.getBlue() - color.getBlue();
-            int dist = dr * dr + dg * dg + db * db;
-            if (dist < min) {
-                min = dist;
-                nearest = cell;
-            }
-        }
-        return new ColorLocation(nearest.x, nearest.y);
+        CellMatch match = findCell(color);
+        return new ColorLocation(match.cell.x, match.cell.y);
     }
 
     @Override
@@ -123,12 +114,67 @@ public class HexagonColorPickerModel extends AbstractColorPickerModel {
 
     @Override
     protected float colorToValue(Color color) {
-        return 1f;
+        if (color == null) {
+            return 1f;
+        }
+        return findCell(color).value;
     }
 
-    @Override
-    public boolean showValueComponent() {
-        return false;
+    /**
+     * Cell color with brightness scaled by value
+     */
+    protected Color cellColor(Cell cell, float value) {
+        if (value >= 1f) {
+            return cell.color;
+        }
+        return new Color(Color.HSBtoRGB(cell.hsb[0], cell.hsb[1], cell.hsb[2] * clamp(value)));
+    }
+
+    /**
+     * Find the cell and value (brightness) that best match the color
+     */
+    protected CellMatch findCell(Color color) {
+        int colorMax = Math.max(color.getRed(), Math.max(color.getGreen(), color.getBlue()));
+        Cell nearest = cells[0];
+        float nearestValue = 1f;
+        int min = Integer.MAX_VALUE;
+        for (Cell cell : cells) {
+            int cellMax = Math.max(cell.color.getRed(), Math.max(cell.color.getGreen(), cell.color.getBlue()));
+            float value = cellMax == 0 ? 1f : clamp(colorMax / (float) cellMax);
+            Color c = cellColor(cell, value);
+            int dr = c.getRed() - color.getRed();
+            int dg = c.getGreen() - color.getGreen();
+            int db = c.getBlue() - color.getBlue();
+            int dist = dr * dr + dg * dg + db * db;
+            // prefer the brighter value when same distance
+            if (dist < min || (dist == min && value > nearestValue)) {
+                min = dist;
+                nearest = cell;
+                nearestValue = value;
+            }
+        }
+        return new CellMatch(nearest, nearestValue);
+    }
+
+    protected void createValueImage(int width, int height, int arc) {
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+        Color color = locationToColor(getLocation(), 1f);
+        if (valueImage == null || valueImage.getWidth() != width || valueImage.getHeight() != height || !color.equals(oldSelectedColor)) {
+            valueImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2 = valueImage.createGraphics();
+            arc = clampArc(width, height, arc);
+            g2.setPaint(new GradientPaint(0, 0, Color.BLACK, width, 0, color));
+            if (arc > 0) {
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.fill(new RoundRectangle2D.Float(0, 0, width, height, arc, arc));
+            } else {
+                g2.fillRect(0, 0, width, height);
+            }
+            g2.dispose();
+            oldSelectedColor = color;
+        }
     }
 
     @Override
@@ -154,7 +200,7 @@ public class HexagonColorPickerModel extends AbstractColorPickerModel {
         if (width <= 0 || height <= 0) {
             return;
         }
-        if (colorImage == null || colorImage.getWidth() != width || colorImage.getHeight() != height) {
+        if (colorImage == null || colorImage.getWidth() != width || colorImage.getHeight() != height || oldValue != getValue()) {
             colorImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
             Graphics2D g2 = colorImage.createGraphics();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -162,11 +208,13 @@ public class HexagonColorPickerModel extends AbstractColorPickerModel {
             float size = Math.min(width, height);
             // small gap between cells
             float radius = CELL_RADIUS * size * 0.96f;
+            float value = getValue();
             for (Cell cell : cells) {
-                g2.setColor(cell.color);
+                g2.setColor(cellColor(cell, value));
                 g2.fill(createHexagon(cell.x * size, cell.y * size, radius));
             }
             g2.dispose();
+            oldValue = value;
         }
     }
 
@@ -286,11 +334,24 @@ public class HexagonColorPickerModel extends AbstractColorPickerModel {
         protected final float x;
         protected final float y;
         protected final Color color;
+        protected final float[] hsb;
 
         protected Cell(float x, float y, Color color) {
             this.x = x;
             this.y = y;
             this.color = color;
+            this.hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+        }
+    }
+
+    protected static class CellMatch {
+
+        protected final Cell cell;
+        protected final float value;
+
+        protected CellMatch(Cell cell, float value) {
+            this.cell = cell;
+            this.value = value;
         }
     }
 }
