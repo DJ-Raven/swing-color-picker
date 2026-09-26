@@ -7,6 +7,8 @@
 - Added 2 new color model:
     - `CorelCircleColorPickerModel`
     - `HexagonColorPickerModel`
+        - Honeycomb of hexagon color cells, with an optional gray row (`grayRowEnabled` by default `true`)
+        - Value component changes the brightness of all cells
 - Added `ColorPickerModel.paintSelection()` so a model can paint its own selection marker
 
 ### Changed
