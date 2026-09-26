@@ -33,6 +33,18 @@ public interface ColorPickerModel {
 
     boolean showValueComponent();
 
+    /**
+     * Paint the marker of the selected location.
+     *
+     * @param x      marker center x
+     * @param y      marker center y
+     * @param bounds bounds of the color image
+     * @return {@code false} to paint the default marker
+     */
+    default boolean paintSelection(Graphics2D g2, int x, int y, Rectangle bounds) {
+        return false;
+    }
+
     void addChangeListener(ColorChangedListener listener);
 
     void removeChangeListener(ColorChangedListener listener);

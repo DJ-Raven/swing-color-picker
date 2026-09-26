@@ -20,7 +20,7 @@ public class TestColor extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(new Dimension(800, 800));
         setLocationRelativeTo(null);
-        setLayout(new LineLayout(LineLayout.VERTICAL));
+        setLayout(new LineLayout(LineLayout.HORIZONTAL, false, LineLayout.CENTER));
         colorPicker = new ColorPicker();
         colorPicker.putClientProperty(FlatClientProperties.STYLE, "" +
                 "border:10,10,10,10,$Component.borderColor,1,15;" +
@@ -119,7 +119,7 @@ public class TestColor extends JFrame {
         panelOption.add(panelPalette);
 
         // model option
-        JPanel panelModel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        JPanel panelModel = new JPanel(new LineLayout(LineLayout.VERTICAL, true));
         panelModel.setBorder(new TitledBorder("Options Color Model"));
 
         ButtonGroup group = new ButtonGroup();
@@ -129,6 +129,7 @@ public class TestColor extends JFrame {
         JRadioButton jrCorelSquare = new JRadioButton("Corel Square");
         JRadioButton jrCorelRhombus = new JRadioButton("Corel Rhombus");
         JRadioButton jrCorelCircle = new JRadioButton("Corel Circle");
+        JRadioButton jrHexagon = new JRadioButton("Hexagon");
         jrDino.addActionListener(e -> {
             if (jrDino.isSelected()) {
                 colorPicker.setModel(new DinoColorPickerModel());
@@ -160,6 +161,19 @@ public class TestColor extends JFrame {
                 colorPicker.setModel(new CorelCircleColorPickerModel());
             }
         });
+        JCheckBox chHexagonGrayRow = new JCheckBox("Hexagon Gray Row", true);
+        chHexagonGrayRow.setEnabled(false);
+        jrHexagon.addItemListener(e -> chHexagonGrayRow.setEnabled(jrHexagon.isSelected()));
+        jrHexagon.addActionListener(e -> {
+            if (jrHexagon.isSelected()) {
+                colorPicker.setModel(new HexagonColorPickerModel(Color.WHITE, chHexagonGrayRow.isSelected()));
+            }
+        });
+        chHexagonGrayRow.addActionListener(e -> {
+            if (colorPicker.getModel() instanceof HexagonColorPickerModel) {
+                ((HexagonColorPickerModel) colorPicker.getModel()).setGrayRowEnabled(chHexagonGrayRow.isSelected());
+            }
+        });
 
         group.add(jrDino);
         group.add(jrDisk);
@@ -167,15 +181,35 @@ public class TestColor extends JFrame {
         group.add(jrCorelSquare);
         group.add(jrCorelRhombus);
         group.add(jrCorelCircle);
+        group.add(jrHexagon);
 
-        panelModel.add(jrDino);
-        panelModel.add(jrDisk);
-        panelModel.add(jrCorelTriangle);
-        panelModel.add(jrCorelSquare);
-        panelModel.add(jrCorelRhombus);
-        panelModel.add(jrCorelCircle);
+        // first row: basic models, second row: corel models
+        LineLayout l1 = new LineLayout();
+        l1.setPadding(new Insets(0, 0, 0, 0));
+        JPanel panelModelRow1 = new JPanel(l1);
+        JPanel panelModelRow2 = new JPanel(l1);
+
+        panelModelRow1.add(jrDino);
+        panelModelRow1.add(jrDisk);
+        panelModelRow1.add(jrHexagon);
+
+        panelModelRow2.add(jrCorelTriangle);
+        panelModelRow2.add(jrCorelSquare);
+        panelModelRow2.add(jrCorelRhombus);
+        panelModelRow2.add(jrCorelCircle);
+
+        panelModel.add(panelModelRow1);
+        panelModel.add(panelModelRow2);
 
         panelOption.add(panelModel);
+
+        // model specific option
+        JPanel panelModelOption = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        panelModelOption.setBorder(new TitledBorder("Model Options"));
+
+        panelModelOption.add(chHexagonGrayRow);
+
+        panelOption.add(panelModelOption);
 
         // other option
         JPanel panelOtherOption = new JPanel(new FlowLayout(FlowLayout.LEADING));

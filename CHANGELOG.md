@@ -4,8 +4,10 @@
 
 ### New features and improvements
 
-- Added new color model:
+- Added 2 new color model:
     - `CorelCircleColorPickerModel`
+    - `HexagonColorPickerModel`
+- Added `ColorPickerModel.paintSelection()` so a model can paint its own selection marker
 
 ### Changed
 

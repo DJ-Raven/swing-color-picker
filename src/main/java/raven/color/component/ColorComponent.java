@@ -115,6 +115,13 @@ public class ColorComponent extends SliderColorModel {
     }
 
     @Override
+    protected void paintSelection(Graphics2D g2, int x, int y, int size) {
+        if (!getModel().paintSelection(g2, x, y, getSlideRectangle())) {
+            super.paintSelection(g2, x, y, size);
+        }
+    }
+
+    @Override
     protected Color getSelectedColor() {
         return new Color(getModel().getSelectedColor().getRGB());
     }
