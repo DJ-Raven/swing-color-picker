@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.1.0-SNAPSHOT]
+
+### New features and improvements
+
+- Added new color model:
+    - `CorelCircleColorPickerModel`
+
+### Changed
+
+- Color models now render per-pixel, so the painted color matches the selected color exactly:
+    - `CorelSquareColorPickerModel`
+    - `CorelRhombusColorPickerModel`
+    - `CorelTriangleColorPickerModel`
+    - `DinoColorPickerModel`
+
 ## [2.0.0] - 2026-01-17
 
 ### New features and improvements
