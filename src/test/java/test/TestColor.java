@@ -3,13 +3,19 @@ package test;
 import com.formdev.flatlaf.*;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import com.formdev.flatlaf.util.SystemFileChooser;
 import raven.color.*;
 import raven.color.component.palette.ColorPaletteType;
 import test.utils.LineLayout;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 public class TestColor extends JFrame {
 
@@ -119,7 +125,7 @@ public class TestColor extends JFrame {
         panelOption.add(panelPalette);
 
         // model option
-        JPanel panelModel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        JPanel panelModel = new JPanel(new LineLayout(LineLayout.VERTICAL, true));
         panelModel.setBorder(new TitledBorder("Options Color Model"));
 
         ButtonGroup group = new ButtonGroup();
@@ -128,6 +134,9 @@ public class TestColor extends JFrame {
         JRadioButton jrCorelTriangle = new JRadioButton("Corel Triangle");
         JRadioButton jrCorelSquare = new JRadioButton("Corel Square");
         JRadioButton jrCorelRhombus = new JRadioButton("Corel Rhombus");
+        JRadioButton jrCorelCircle = new JRadioButton("Corel Circle");
+        JRadioButton jrHexagon = new JRadioButton("Hexagon");
+        JRadioButton jrImage = new JRadioButton("Image");
         jrDino.addActionListener(e -> {
             if (jrDino.isSelected()) {
                 colorPicker.setModel(new DinoColorPickerModel());
@@ -154,20 +163,88 @@ public class TestColor extends JFrame {
                 colorPicker.setModel(new CorelRhombusColorPickerModel());
             }
         });
+        jrCorelCircle.addActionListener(e -> {
+            if (jrCorelCircle.isSelected()) {
+                colorPicker.setModel(new CorelCircleColorPickerModel());
+            }
+        });
+        JCheckBox chHexagonGrayRow = new JCheckBox("Hexagon Gray Row", true);
+        chHexagonGrayRow.setEnabled(false);
+        jrHexagon.addItemListener(e -> chHexagonGrayRow.setEnabled(jrHexagon.isSelected()));
+        jrHexagon.addActionListener(e -> {
+            if (jrHexagon.isSelected()) {
+                colorPicker.setModel(new HexagonColorPickerModel(Color.WHITE, chHexagonGrayRow.isSelected()));
+            }
+        });
+        chHexagonGrayRow.addActionListener(e -> {
+            if (colorPicker.getModel() instanceof HexagonColorPickerModel) {
+                ((HexagonColorPickerModel) colorPicker.getModel()).setGrayRowEnabled(chHexagonGrayRow.isSelected());
+            }
+        });
+        JButton cmdChooseImage = new JButton("Choose Image...");
+        cmdChooseImage.setEnabled(false);
+        jrImage.addItemListener(e -> cmdChooseImage.setEnabled(jrImage.isSelected()));
+        jrImage.addActionListener(e -> {
+            if (jrImage.isSelected()) {
+                colorPicker.setModel(new ImageColorPickerModel(createSampleIcon()));
+            }
+        });
+        cmdChooseImage.addActionListener(e -> {
+            if (colorPicker.getModel() instanceof ImageColorPickerModel) {
+                SystemFileChooser chooser = new SystemFileChooser();
+                chooser.setDialogTitle("Choose Image");
+                chooser.setFileFilter(new SystemFileChooser.FileNameExtensionFilter("Image", ImageIO.getReaderFileSuffixes()));
+                if (chooser.showOpenDialog(this) == SystemFileChooser.APPROVE_OPTION) {
+                    try {
+                        BufferedImage image = ImageIO.read(chooser.getSelectedFile());
+                        if (image != null) {
+                            ((ImageColorPickerModel) colorPicker.getModel()).setIcon(new ImageIcon(image));
+                        }
+                    } catch (IOException err) {
+                        System.err.println(err.getMessage());
+                    }
+                }
+            }
+        });
 
         group.add(jrDino);
         group.add(jrDisk);
         group.add(jrCorelTriangle);
         group.add(jrCorelSquare);
         group.add(jrCorelRhombus);
+        group.add(jrCorelCircle);
+        group.add(jrHexagon);
+        group.add(jrImage);
 
-        panelModel.add(jrDino);
-        panelModel.add(jrDisk);
-        panelModel.add(jrCorelTriangle);
-        panelModel.add(jrCorelSquare);
-        panelModel.add(jrCorelRhombus);
+        // first row: basic models, second row: corel models
+        LineLayout l1 = new LineLayout();
+        l1.setPadding(new Insets(0, 0, 0, 0));
+        JPanel panelModelRow1 = new JPanel(l1);
+        JPanel panelModelRow2 = new JPanel(l1);
+
+        panelModelRow1.add(jrDino);
+        panelModelRow1.add(jrDisk);
+        panelModelRow1.add(jrHexagon);
+        panelModelRow1.add(jrImage);
+
+        panelModelRow2.add(jrCorelTriangle);
+        panelModelRow2.add(jrCorelSquare);
+        panelModelRow2.add(jrCorelRhombus);
+        panelModelRow2.add(jrCorelCircle);
+
+        panelModel.add(panelModelRow1);
+        panelModel.add(panelModelRow2);
 
         panelOption.add(panelModel);
+
+        // model specific option
+        JPanel panelModelOption = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        panelModelOption.setBorder(new TitledBorder("Model Options"));
+
+        panelModelOption.add(chHexagonGrayRow);
+        panelModelOption.add(cmdChooseImage);
+
+        panelOption.add(panelModelOption);
 
         // other option
         JPanel panelOtherOption = new JPanel(new FlowLayout(FlowLayout.LEADING));
@@ -213,6 +290,48 @@ public class TestColor extends JFrame {
         } else if (rMaterialColor.isSelected()) {
             colorPicker.applyColorPaletteType(ColorPaletteType.MATERIAL);
         }
+    }
+
+    /**
+     * Sample landscape image for the image color picker model
+     */
+    private Icon createSampleIcon() {
+        int width = 320;
+        int height = 200;
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2 = image.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // sky
+        g2.setPaint(new LinearGradientPaint(0, 0, 0, height * 0.7f, new float[]{0f, 0.6f, 1f},
+                new Color[]{new Color(0x2B3A8C), new Color(0xE0679A), new Color(0xFFB45A)}));
+        g2.fillRect(0, 0, width, height);
+
+        // sun
+        g2.setColor(new Color(0xFFE38A));
+        g2.fill(new Ellipse2D.Float(190, 70, 70, 70));
+
+        // hills
+        g2.setColor(new Color(0x3F7D4E));
+        Path2D back = new Path2D.Float();
+        back.moveTo(0, 140);
+        back.curveTo(80, 90, 160, 150, 320, 110);
+        back.lineTo(320, 200);
+        back.lineTo(0, 200);
+        back.closePath();
+        g2.fill(back);
+
+        g2.setColor(new Color(0x24513A));
+        Path2D front = new Path2D.Float();
+        front.moveTo(0, 170);
+        front.curveTo(100, 130, 220, 190, 320, 150);
+        front.lineTo(320, 200);
+        front.lineTo(0, 200);
+        front.closePath();
+        g2.fill(front);
+
+        g2.dispose();
+        return new ImageIcon(image);
     }
 
     public static void main(String[] args) {

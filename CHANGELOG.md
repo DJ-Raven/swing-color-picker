@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.1.0-SNAPSHOT]
+
+### New features and improvements
+
+- Added 3 new color model:
+    - `CorelCircleColorPickerModel`
+    - `HexagonColorPickerModel`
+        - Honeycomb of hexagon color cells, with an optional gray row (`grayRowEnabled` by default `true`)
+        - Value component changes the brightness of all cells
+    - `ImageColorPickerModel`
+        - Pick color from an image, set with `setIcon(Icon)`
+- Added `ColorPickerModel.paintSelection()` so a model can paint its own selection marker
+
+### Changed
+
+- Color models now render per-pixel, so the painted color matches the selected color exactly:
+    - `CorelSquareColorPickerModel`
+    - `CorelRhombusColorPickerModel`
+    - `CorelTriangleColorPickerModel`
+    - `DinoColorPickerModel`
+
 ## [2.0.0] - 2026-01-17
 
 ### New features and improvements

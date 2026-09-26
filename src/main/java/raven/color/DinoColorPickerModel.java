@@ -86,18 +86,27 @@ public class DinoColorPickerModel extends AbstractColorPickerModel {
             return;
         }
         if (colorImage == null || (colorImage.getWidth() != width || colorImage.getHeight() != height) || oldValue != getValue()) {
-            colorImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2 = colorImage.createGraphics();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            GradientPaint primary = new GradientPaint(0f, 0f, Color.WHITE, width, 0f, Color.getHSBColor(getValue(), 1f, 1f));
-            GradientPaint shade = new GradientPaint(0f, 0f, new Color(0, 0, 0, 0), 0f, height, new Color(0, 0, 0, 255));
-            g2.setPaint(primary);
+            float hue = getValue();
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            int[] pixels = new int[width * height];
+            for (int y = 0; y < height; y++) {
+                float b = clamp(1f - (y + 0.5f) / height);
+                for (int x = 0; x < width; x++) {
+                    float s = clamp((x + 0.5f) / width);
+                    pixels[y * width + x] = Color.HSBtoRGB(hue, s, b);
+                }
+            }
+            image.setRGB(0, 0, width, height, pixels, 0, width);
 
             arc = clampArc(width, height, arc);
 
+            // mask with rounded rectangle
+            colorImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2 = colorImage.createGraphics();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.fill(new RoundRectangle2D.Float(0, 0, width, height, arc, arc));
-            g2.setPaint(shade);
-            g2.fill(new RoundRectangle2D.Float(0, 0, width, height, arc, arc));
+            g2.setComposite(AlphaComposite.SrcIn);
+            g2.drawImage(image, 0, 0, null);
             g2.dispose();
             oldValue = getValue();
         }

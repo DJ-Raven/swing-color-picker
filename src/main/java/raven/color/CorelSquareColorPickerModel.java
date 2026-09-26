@@ -210,17 +210,18 @@ public class CorelSquareColorPickerModel extends DiskColorPickerModel {
     }
 
     protected BufferedImage createSelectionImage(Color color, int size, int arc) {
-        Shape shape = createSelectionImageShape(size, arc);
+        float hue = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null)[0];
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = image.createGraphics();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        GradientPaint primary = new GradientPaint(0f, 0f, Color.WHITE, size, 0f, color);
-        GradientPaint shade = new GradientPaint(0f, 0f, new Color(0, 0, 0, 0), 0f, size, new Color(0, 0, 0, 255));
-        g2.setPaint(primary);
-        g2.fill(shape);
-        g2.setPaint(shade);
-        g2.fill(shape);
-        return image;
+        int[] pixels = new int[size * size];
+        for (int y = 0; y < size; y++) {
+            float b = clamp(1f - (y + 0.5f) / size);
+            for (int x = 0; x < size; x++) {
+                float s = clamp((x + 0.5f) / size);
+                pixels[y * size + x] = Color.HSBtoRGB(hue, s, b);
+            }
+        }
+        image.setRGB(0, 0, size, size, pixels, 0, size);
+        return maskImage(image, createSelectionImageShape(size, arc));
     }
 
     protected Shape createSelectionImageShape(int size, int arc) {

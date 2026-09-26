@@ -86,6 +86,18 @@ colorPicker.setModel(new CorelTriangleColorPickerModel());
 | `CorelSquareColorPickerModel`   | Square color selector with circular hue wheel |
 | `CorelTriangleColorPickerModel` | Triangle selector with circular hue wheel     |
 | `CorelRhombusColorPickerModel`  | Rhombus  selector with circular hue wheel     |
+| `CorelCircleColorPickerModel`   | Circle   selector with circular hue wheel     |
+| `HexagonColorPickerModel`       | Honeycomb of hexagon cells with a gray row    |
+| `ImageColorPickerModel`         | Pick color from an image                      |
+
+## Documentation
+
+See the [documentation](docs/README.md) for more details
+
+- [Getting Started](docs/getting-started.md)
+- [Color Picker Options](docs/color-picker-options.md)
+- [Color Models](docs/color-models.md)
+- [Custom Model](docs/custom-model.md)
 
 ## Library Resources
 

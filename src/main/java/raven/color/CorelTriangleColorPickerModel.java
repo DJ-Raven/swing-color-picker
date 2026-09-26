@@ -98,32 +98,24 @@ public class CorelTriangleColorPickerModel extends CorelSquareColorPickerModel {
 
     @Override
     protected BufferedImage createSelectionImage(Color color, int size, int arc) {
-        Shape triangle = createTriangle(size);
-        Rectangle bounds = triangle.getBounds();
+        float hue = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null)[0];
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-        int w = bounds.width + bounds.x;
-        int h = bounds.height + bounds.y;
+        int[] pixels = new int[size * size];
+        for (int y = 0; y < size; y++) {
+            float ny = (y + 0.5f) / size;
+            for (int x = 0; x < size; x++) {
+                float nx = (x + 0.5f) / size;
 
-        float ax = w / 2f, ay = bounds.y;
-        float bx = bounds.x;
-
-        Color cb = Color.BLACK;
-        Color cc = Color.WHITE;
-        float det = (ax - w) + (w - bx) * (ay - h);
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                float l1 = ((w - bx) * (y - h)) / det;
-                float l2 = ((h - ay) * (x - w) + (ax - w) * (y - h)) / det;
-                float l3 = 1f - l1 - l2;
-
-                int r = clamp((int) (l1 * color.getRed() + l2 * cb.getRed() + l3 * cc.getRed()));
-                int gg = clamp((int) (l1 * color.getGreen() + l2 * cb.getGreen() + l3 * cc.getGreen()));
-                int b = clamp((int) (l1 * color.getBlue() + l2 * cb.getBlue() + l3 * cc.getBlue()));
-
-                image.setRGB(x, y, new Color(r, gg, b).getRGB());
+                // same mapping as locationToColor
+                float[] w = barycentric(nx, ny, PURE, WHITE, BLACK);
+                float wPure = clamp(w[0]);
+                float v = clamp(1f - clamp(w[2]));
+                float s = (v == 0f) ? 0f : clamp(wPure / v);
+                pixels[y * size + x] = Color.HSBtoRGB(hue, s, v);
             }
         }
-        return maskImage(image, triangle);
+        image.setRGB(0, 0, size, size, pixels, 0, size);
+        return maskImage(image, createTriangle(size));
     }
 
     protected Shape createTriangle(int size) {
